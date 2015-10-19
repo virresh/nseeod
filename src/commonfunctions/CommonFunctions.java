@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2011,2012,2013 Rohit Jhunjhunwala
+Copyright (c) 2011,2012,2013,2014 Rohit Jhunjhunwala
 
 The program is distributed under the terms of the GNU General Public License
 
@@ -30,9 +30,10 @@ import javax.swing.JComponent;
 
 import config.configxml.CheckBox;
 
-public class Common_functions {
+public class CommonFunctions {
 
 	public static final String DDMMYYYYhifenFormat = "dd-MM-yyyy";
+	public static final String DDMMMYYYYhifenFormat = "dd-MMM-yyyy";
 	public static final String YYYYMMDDhifenFormat = "yyyy-MM-dd";
 	public static final String YYYYMMDDformat = "yyyyMMdd";
 	public static final String DDMMYYFormat="ddMMyy";
@@ -140,10 +141,16 @@ public class Common_functions {
 			return "CNX FMCG";
 		else if (indexName.equalsIgnoreCase("CNX 100"))
 			return "CNX 100";
-		return null;
+		else if (indexName.equalsIgnoreCase("CNX AUTO"))
+			return "CNX AUTO";
+		else if (indexName.equalsIgnoreCase("CNX FINANCE"))
+			return "CNX FINANCE";
+		else if (indexName.equalsIgnoreCase("CNX METAL"))
+			return "CNX METAL";
+		return indexName;
 	}
 
-	public static String convert_index_symbol(String indexSymbol){
+	public static String convertIndexSymbol(String indexSymbol){
 		if (indexSymbol.equals("CNX NIFTY"))
 			return "NIFTY";
 		else if (indexSymbol.equals("CNX NIFTY JUNIOR"))
@@ -186,6 +193,12 @@ public class Common_functions {
 			return "NSEPSUBANK";
 		else if (indexSymbol.equals("CNX SERVICE"))
 			return "NSESERVICE";
-		return "";
+		else if (indexSymbol.equalsIgnoreCase("CNX AUTO"))
+			return "NSEAUTO";
+		else if (indexSymbol.equalsIgnoreCase("CNX FINANCE"))
+			return "NSEFINANCE";
+		else if (indexSymbol.equalsIgnoreCase("CNX METAL"))
+			return "NSEMETAL";
+		return indexSymbol;
 	}
 }

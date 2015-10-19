@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2011,2012,2013 Rohit Jhunjhunwala
+Copyright (c) 2011,2012,2013,2014 Rohit Jhunjhunwala
 
 The program is distributed under the terms of the GNU General Public License
 
@@ -83,7 +83,6 @@ public class Details extends JFrame {
 			jContentPane = new JPanel();
 			jContentPane.setLayout(null);
 			jContentPane.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.RAISED));
-			//jContentPane.setBackground(SystemColor.inactiveCaptionText);
 			jContentPane.setEnabled(true);
 			jContentPane.add(getJTextArea1(), null);
 			jContentPane.add(getJTextArea2(), null);
@@ -108,7 +107,6 @@ public class Details extends JFrame {
 			jTextArea1.setLineWrap(true);
 			jTextArea1.setFont(new Font("Tahoma", Font.PLAIN, 11));
 			jTextArea1.setWrapStyleWord(true);
-			//jTextArea1.setBackground(SystemColor.inactiveCaptionText);
 		}
 		return jTextArea1;
 	}
@@ -124,7 +122,6 @@ public class Details extends JFrame {
 			jTextArea2.setText("NSE EOD Downloader version "+commonfunctions.Constants.versionNumber+"\nCreated By :: Rohit Jhunjhunwala");
 			jTextArea2.setFont(new Font("Tahoma", Font.PLAIN, 11));
 			jTextArea2.setEditable(false);
-			//jTextArea2.setBackground(SystemColor.inactiveCaptionText);
 		}
 		return jTextArea2;
 	}
@@ -136,7 +133,6 @@ public class Details extends JFrame {
 	private JTextArea getJTextArea3() {
 		if (jTextArea3 == null) {
 			jTextArea3 = new JTextArea();
-			//jTextArea3.setBackground(SystemColor.info);
 			jTextArea3.setText(" For any issues please drop me an email at rohit6699@gmail.com\n Share this software with as many people as you can\n Knowledge is meant to be shared");
 			jTextArea3.setFont(new Font("Tahoma", Font.PLAIN, 11));
 			jTextArea3.setEditable(false);
@@ -195,9 +191,8 @@ public class Details extends JFrame {
 		if (jTextArea == null) {
 			jTextArea = new JTextArea();
 			jTextArea.setBounds(new Rectangle(149, 197, 256, 18));
-			jTextArea.setText("Copyright (C) 2013  Rohit Jhunjhunwala");
+			jTextArea.setText("Copyright (C) 2014  Rohit Jhunjhunwala");
 			jTextArea.setFont(new Font("Tahoma", Font.PLAIN, 11));
-			//jTextArea.setBackground(SystemColor.inactiveCaptionText);
 		}
 		return jTextArea;
 	}

@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2011,2012,2013 Rohit Jhunjhunwala
+Copyright (c) 2011,2012,2013,2014 Rohit Jhunjhunwala
 
 The program is distributed under the terms of the GNU General Public License
 
@@ -23,7 +23,7 @@ package testconnection;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
-import commonfunctions.Common_functions;
+import commonfunctions.CommonFunctions;
 
 import dto.ValidationDTO;
 
@@ -35,7 +35,7 @@ public class DateValidation {
 		GregorianCalendar fromDateCalendar=null;
 		GregorianCalendar toDateCalendar=null;
 		GregorianCalendar currentDateCalendar=new GregorianCalendar();
-		currentDateCalendar.setTime(Common_functions.getCurrentDateTime());
+		currentDateCalendar.setTime(CommonFunctions.getCurrentDateTime());
 		fromDateCalendar=new GregorianCalendar();
 		fromDateCalendar.setTime(fromDate);
 		toDateCalendar=new GregorianCalendar();
@@ -50,7 +50,7 @@ public class DateValidation {
 			return validation;
 		}
 		if((fromDateCalendar.compareTo(toDateCalendar))==1){
-			validation.setMessage("To Date is less than from Date");
+			validation.setMessage("To Date cannot be less than From Date");
 			validation.setSuccess(false);
 			return validation;
 		}

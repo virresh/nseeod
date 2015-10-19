@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2011,2012,2013 Rohit Jhunjhunwala
+Copyright (c) 2011,2012,2013,2014 Rohit Jhunjhunwala
 
 The program is distributed under the terms of the GNU General Public License
 
@@ -92,10 +92,9 @@ public class Notice extends JFrame {
 			jTextArea = new JTextArea();
 			jTextArea.setText("POST YOUR REQUESTS:\n\nIf you want any feature to be added or improved please let me know at\n\nhttp://sourceforge.net/tracker/?atid=2048768&group_id=503741&func=browse\n\nand I will try my level best to include it in the next version. Even this version has some features suggested by the users and I am very thankful to them to help me improve this software.\n\nREPORT ANY BUG:\n\nIf you find a bug/issue with the software please let me know at\n\nhttp://sourceforge.net/tracker/?atid=2048768&group_id=503741&func=browse\n\nIf possible I will fix that bug/issue and release it on the very next day.\nVersion 1.1.1 was a bug fix of Version 1.1 and was fixed overnight after user reported an issue.\n\nRECOMMENDATIONS:\n\nI have given a lot of time and effort to this project. In return I am asking no money or donation. All I request you is that if you like this software please recommend me at\n\nhttp://sourceforge.net/projects/nse-eod/reviews/\n\nYou can also Hit the Facebook LIKE button at\n\nhttp://nse-eod-downloader.blogspot.com/\n\nIt will only take a minute to do so but will encourage me a lot to further develop this project\n\nVISIT:\n\nFollow me on\nhttp://nse-eod-downloader.blogspot.com/\nto know about day to day activities on the latest developement and other works on this software.\n\nKNOWLEDGE IS MEANT TO BE SHARED:\n\nShare this software with as many people as you can");
 			jTextArea.setWrapStyleWord(true);
-			jTextArea.setPreferredSize(new Dimension(500, 800));
 			jTextArea.setLineWrap(true);
 			jTextArea.setLocation(new Point(0, 0));
-			jTextArea.setSize(new Dimension(487, 780));
+			jTextArea.setSize(new Dimension(487, 900));
 			jTextArea.setEditable(false);
 		}
 		return jTextArea;
@@ -109,7 +108,6 @@ public class Notice extends JFrame {
 	private JScrollPane getJScrollPane() {
 		if (jScrollPane == null) {
 			jScrollPane = new JScrollPane();
-			jScrollPane.setPreferredSize(new Dimension(500, 471));
 			jScrollPane.setLocation(new Point(1, 1));
 			jScrollPane.setSize(new Dimension(508, 688));
 			jScrollPane.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));

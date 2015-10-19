@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2011,2012,2013 Rohit Jhunjhunwala
+Copyright (c) 2011,2012,2013,2014 Rohit Jhunjhunwala
 
 The program is distributed under the terms of the GNU General Public License
 
@@ -28,20 +28,18 @@ import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.List;
 
-import config.configxml.SettingsFactory;
+import config.configxml.Settings;
 
-public class Convert_EQ  extends ConvertFile{
+public class ConvertEQ  extends ConvertFile{
 	
-	public File convert_eq(String filePath) throws Exception
+	public File convertToDesiredFormat(String filePath) throws Exception
 	{
 		String date=filePath.substring(filePath.length()-17, filePath.length()-8);//DDMONYYYY
 		//READ FILE
 		FileReader reader=new FileReader(filePath);
 		BufferedReader bufferReader=new BufferedReader(reader);
-		//FileWriter writer=new FileWriter(System.getProperty("user.dir")+"\\EOD\\"+date+".txt",true);
 		//Overwrites the file as per Request number 3208914
-		//FileWriter writer=new FileWriter(System.getProperty("user.dir")+"\\EOD\\"+date+".txt");
-		String equityDir= SettingsFactory.getSettings().getDownload().getEquity().getDirectory();
+		String equityDir= Settings.getSettings().getDownload().getEquity().getDirectory();
 		File convertedFile=new File(equityDir+System.getProperty("file.separator")+"EQ_"+date+".txt");
 		convertedFile.getParentFile().mkdirs();
 		FileWriter writer=new FileWriter(convertedFile);
@@ -53,7 +51,7 @@ public class Convert_EQ  extends ConvertFile{
 			if(row.get(1).replaceAll(" ", "").equalsIgnoreCase("EQ")||row.get(1).replaceAll(" ", "").equalsIgnoreCase("BE"))
 			{
 				String line2=row.get(0).replaceAll(" ", "")+","+//stock name
-				database_date(date)+","+//stock date YYYYMMDD
+				convertToDate(date)+","+//stock date YYYYMMDD
 				row.get(2).replaceAll(" ", "")+","+//Open
 				row.get(3).replaceAll(" ", "")+","+//High
 				row.get(4).replaceAll(" ", "")+","+//Low

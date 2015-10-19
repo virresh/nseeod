@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2011,2012,2013 Rohit Jhunjhunwala
+Copyright (c) 2011,2012,2013,2014 Rohit Jhunjhunwala
 
 The program is distributed under the terms of the GNU General Public License
 
@@ -20,33 +20,27 @@ along with NSE EOD Data Downloader.  If not, see <http://www.gnu.org/licenses/>.
  */
 package downloadfiles;
 
-import java.io.File;
-import java.net.URLEncoder;
 import java.util.HashMap;
 
-import convertcsv.Convert_Indices;
+import commonfunctions.CommonFunctions;
 
-import logging.logging;
+import logging.Logging;
+import convertcsv.ConvertIndices;
 
 public class IndexFiles extends DownloadFile {
 
-	private logging logger=logging.getLogger();
-	//Need to properly refactor the code
-	private void downloadIndexData(String symbol,String fromDate,String toDate) throws Exception{
-		post_data_index(symbol, fromDate, toDate);
-		download_csv(symbol, fromDate, toDate);	
-	}
+	private Logging logger=Logging.getLogger();
 	
 	public void downloadIndexData(String[] stockSymbol,String date){
 		// Added the try catch block which retries if posting data is failed
-					// As per request no 3197092 from thenikxyz
+		// As per request no 3197092 from thenikxyz
 		logger.log("Starting Index download");
 		int i = 0;
 		int attempt = 1;
 		while (stockSymbol!=null && i < stockSymbol.length)
 		{
 			try {
-				downloadIndexData(stockSymbol[i],
+				downloadCSV(stockSymbol[i],
 						date, date);
 			} catch (Exception e) {
 				if (attempt == 3) {
@@ -66,41 +60,29 @@ public class IndexFiles extends DownloadFile {
 		}
 		logger.log("Ending Index download");
 	}
-	
-	private void post_data_index(String symbol,String fromDate,String toDate) throws Exception{
-		String postData=null;
-		HashMap<String,String> requestProperty=prepareRequestPropertyMap();
-		String urlLink="http://www.nseindia.com/marketinfo/indices/histdata/historicalindices.jsp";
-		postData = URLEncoder.encode("indexType", "UTF-8")+"="+URLEncoder.encode(symbol, "UTF-8")+"&"+
-		URLEncoder.encode("fromDate","UTF-8") +"="+URLEncoder.encode(fromDate,"UTF-8")+"&"+
-		URLEncoder.encode("toDate","UTF-8")+"="+URLEncoder.encode(toDate,"UTF-8");
-		logger.log("Posting Data");
-		new DownloadFile().postData(urlLink, postData, requestProperty);
-		logger.sendMessageToDisplay(symbol);
-		logger.log(symbol);
-//		download_csv(symbol,fromDate,toDate);
-	}
-	
-	private void download_csv(String symbol,String fromDate,String toDate)  throws Exception{
-		String link=("http://www.nseindia.com/content/indices/histdata/"+symbol+fromDate+"-"+toDate+".csv").replace(" ", "%20");
+
+	private void downloadCSV(String symbol,String fromDate,String toDate)  throws Exception{
+		logger.log(symbol, symbol);
+		String link=null;
+		if(symbol.equalsIgnoreCase("VIX")){
+			//link=("http://www.nseindia.com/content/vix/histdata/hist_india_vix_"+fromDate+"_"+fromDate+".csv");
+			link=String.format(getBaseURLs().getPrimaryLink().appendEndURL(getLinks().getVixBhacopyLink()) ,CommonFunctions.getStringToDate(fromDate, CommonFunctions.DDMMYYYYhifenFormat));
+		}
+		else{
+			//link=("http://www.nseindia.com/content/indices/histdata/"+symbol+fromDate+"-"+toDate+".csv").replace(" ", "%20");
+			link=String.format(getBaseURLs().getPrimaryLink().appendEndURL(getLinks().getIndexBahvcopyLink()),symbol.replace(" ", "%20"),CommonFunctions.getStringToDate(fromDate, CommonFunctions.DDMMYYYYhifenFormat));
+		}
 		String outputDir=System.getProperty("user.dir")+"/temp/";		//SET THE DESTINATION OF OUTPUT FILE
 		String fileNameWithExtension=symbol+"_"+fromDate+".csv";
 		HashMap<String,String> requestPropertyMap= prepareRequestPropertyMap();
-		new DownloadFile().downloadFile(link, outputDir, fileNameWithExtension, requestPropertyMap);
+		downloadFile(link, outputDir, fileNameWithExtension, requestPropertyMap);
 		//CONVERT THE CSV FILE INTO TEXT FILE
 		//------------------------------------------------------------
 		try {
-			new Convert_Indices().convert_indices(symbol,new File(outputDir+fileNameWithExtension),fromDate);
+			new ConvertIndices(symbol).convertToDesiredFormat(outputDir+fileNameWithExtension);
 		} catch (Exception e) {
-			logger.log(e,"Could not process the file"+symbol+"_"+fromDate+".csv",true);
-			
+			logger.log(e,"Could not process the file"+symbol+"_"+fromDate+".csv",true);		
 		}
 		//------------------------------------------------------------
-	}
-	
-	private HashMap<String,String>  prepareRequestPropertyMap(){
-		HashMap<String,String> requestPropertyMap= new HashMap<String,String>();
-		requestPropertyMap.put("user-agent", "User Agent: Mozilla/5.0 (compatible; Konqueror/4.1; Linux) KHTML/4.1.3 (like Gecko) SUSE");
-		return requestPropertyMap;
 	}
 }

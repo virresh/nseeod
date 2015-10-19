@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2011,2012,2013 Rohit Jhunjhunwala
+Copyright (c) 2011,2012,2013,2014 Rohit Jhunjhunwala
 
 The program is distributed under the terms of the GNU General Public License
 
@@ -26,7 +26,6 @@ import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.io.File;
 import java.util.ArrayList;
 
 import javax.swing.JButton;
@@ -43,21 +42,21 @@ import javax.swing.WindowConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import logging.logging;
+import logging.Logging;
 import rjswing.RJFileChooser;
 
-import commonfunctions.Common_functions;
+import commonfunctions.CommonFunctions;
 
 import config.configxml.CheckBox;
 import config.configxml.CheckBoxHolder;
 import config.configxml.Settings;
-import config.configxml.SettingsFactory;
 import config.configxml.download.Download;
 import config.configxml.download.DownloadPanelBase;
 import config.configxml.others.Others;
 import exceptionhandler.ExceptionHandler;
 
-public class Config_Settings extends JFrame implements WindowListener{
+//TODO replace strings with string constants
+public class ConfigSettings extends JFrame implements WindowListener{
 
 	private static final long serialVersionUID = 1L;
 	private JPanel jContentPane = null; // @jve:decl-index=0:visual-constraint="10,10"
@@ -87,7 +86,12 @@ public class Config_Settings extends JFrame implements WindowListener{
 	private JCheckBox jCheckBoxCNXService = null;
 	private JCheckBox jCheckBoxCNXFmcg = null;
 	private JCheckBox jCheckBoxCNX100 = null;
+	private JCheckBox jCheckBoxCNXAuto = null;
+	private JCheckBox jCheckBoxCNXFinance=null;
+	private JCheckBox jCheckBoxCNXMetal=null;
+	private JCheckBox jCheckBoxVIX = null;
 	private JButton jButtonIdxCheckAll = null;
+	private JButton jButtonIdxUncheckAll = null;
 	private JSeparator jSeparator = null;
 	private JSeparator jSeparatorEquityRight = null;
 	private JSeparator jSeparatorEquityTop = null;
@@ -156,23 +160,11 @@ public class Config_Settings extends JFrame implements WindowListener{
 	private RJFileChooser futureFileChooser = null;
 	private RJFileChooser currFuturesfileChooser = null;
 
-//	public static Config_Settings getInstance() {
-//		try {
-//			if (configSettings == null) {
-//				configSettings = new Config_Settings();
-//			}
-//			return configSettings;
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			throw new RuntimeException(e);
-//		}
-//	}
-
 	/**
 	 * This is the default constructor
 	 * @throws Exception 
 	 */
-	public Config_Settings() throws Exception{
+	public ConfigSettings() throws Exception{
 		super();
 		initialize();
 	}
@@ -197,11 +189,7 @@ public class Config_Settings extends JFrame implements WindowListener{
 		} catch (Exception e) {
 			ExceptionHandler.showException(e);
 		}
-		if (new File(System.getProperty("user.dir") + "/config.xml").exists()) {
-			restoreSettings(jTabbedPane);
-		} else {
-			updateSettingsModel(jTabbedPane);
-		}
+		restoreSettings(jTabbedPane);
 	}
 
 	/**
@@ -307,7 +295,12 @@ public class Config_Settings extends JFrame implements WindowListener{
 			jPanel.add(getJCheckBoxCNXService(), null);
 			jPanel.add(getJCheckBoxCNXFmcg(), null);
 			jPanel.add(getJCheckBoxCNX100(), null);
+			jPanel.add(getJCheckBoxCNXAuto(),null);
+			jPanel.add(getJCheckBoxFinance(),null);
+			jPanel.add(getJCheckBoxCNXMetal(),null);
+			jPanel.add(getJCheckBoxVIX(),null);
 			jPanel.add(getJButtonIdxCheckAll(), null);
+			jPanel.add(getJButtonIdxUncheckAll(),null);
 			jPanel.add(getJSeparator(), null);
 		}
 		return jPanel;
@@ -600,7 +593,7 @@ public class Config_Settings extends JFrame implements WindowListener{
 	private JCheckBox getJCheckBoxCNXPse() {
 		if (jCheckBoxCNXPse == null) {
 			jCheckBoxCNXPse = new JCheckBox();
-			jCheckBoxCNXPse.setBounds(new Rectangle(253, 72, 109, 21));
+			jCheckBoxCNXPse.setBounds(new Rectangle(253, 72, 108, 21));
 			jCheckBoxCNXPse.setToolTipText("CNX PSE");
 			jCheckBoxCNXPse.setText("CNX PSE");
 		}
@@ -666,7 +659,50 @@ public class Config_Settings extends JFrame implements WindowListener{
 		}
 		return jCheckBoxCNX100;
 	}
+	
+	private JCheckBox getJCheckBoxCNXAuto(){
+		if(jCheckBoxCNXAuto==null){
+			jCheckBoxCNXAuto = new JCheckBox();
+			jCheckBoxCNXAuto.setBounds(new Rectangle(13, 224, 108, 21));
+			jCheckBoxCNXAuto.setToolTipText("CNX AUTO");
+			jCheckBoxCNXAuto.setSelected(true);
+			jCheckBoxCNXAuto.setText("CNX AUTO");
+		}
+		return jCheckBoxCNXAuto;
+	}
+	
+	private JCheckBox getJCheckBoxCNXMetal() {
+		if (jCheckBoxCNXMetal == null) {
+			jCheckBoxCNXMetal = new JCheckBox();
+			jCheckBoxCNXMetal.setBounds(new Rectangle(253, 224, 108, 21));
+			jCheckBoxCNXMetal.setToolTipText("CNX METAL");
+			jCheckBoxCNXMetal.setText("CNX METAL");
+		}
+		return jCheckBoxCNXMetal;
+	}
+	
+	private JCheckBox getJCheckBoxFinance() {
+		if (jCheckBoxCNXFinance == null) {
+			jCheckBoxCNXFinance = new JCheckBox();
+			jCheckBoxCNXFinance.setBounds(new Rectangle(132, 224, 108, 21));
+			jCheckBoxCNXFinance.setToolTipText("CNX FINANCE");
+			jCheckBoxCNXFinance.setSelected(true);
+			jCheckBoxCNXFinance.setText("CNX FINANCE");
+		}
+		return jCheckBoxCNXFinance;
+	}
 
+	private JCheckBox getJCheckBoxVIX() {
+		if (jCheckBoxVIX == null) {
+			jCheckBoxVIX = new JCheckBox();
+			jCheckBoxVIX.setBounds(new Rectangle(13, 255, 108, 21));
+			jCheckBoxVIX.setToolTipText("VIX");
+			jCheckBoxVIX.setSelected(true);
+			jCheckBoxVIX.setText("VIX");
+		}
+		return jCheckBoxVIX;
+	}
+	
 	/**
 	 * This method initializes jButtonIdxCheckAll
 	 * 
@@ -675,7 +711,7 @@ public class Config_Settings extends JFrame implements WindowListener{
 	private JButton getJButtonIdxCheckAll() {
 		if (jButtonIdxCheckAll == null) {
 			jButtonIdxCheckAll = new JButton();
-			jButtonIdxCheckAll.setBounds(new Rectangle(17, 231, 104, 25));
+			jButtonIdxCheckAll.setBounds(new Rectangle(13, 293, 104, 25));
 			jButtonIdxCheckAll.setMnemonic(KeyEvent.VK_UNDEFINED);
 			jButtonIdxCheckAll.setText("Check All");
 			jButtonIdxCheckAll
@@ -687,6 +723,27 @@ public class Config_Settings extends JFrame implements WindowListener{
 		}
 		return jButtonIdxCheckAll;
 	}
+	
+	/**
+	 * This method initializes jButtonIdxUncheckAll
+	 * 
+	 * @return javax.swing.JButton
+	 */
+	private JButton getJButtonIdxUncheckAll() {
+		if (jButtonIdxUncheckAll == null) {
+			jButtonIdxUncheckAll = new JButton();
+			jButtonIdxUncheckAll.setBounds(new Rectangle(132, 293, 104, 25));
+			jButtonIdxUncheckAll.setMnemonic(KeyEvent.VK_UNDEFINED);
+			jButtonIdxUncheckAll.setText("Uncheck All");
+			jButtonIdxUncheckAll
+					.addActionListener(new java.awt.event.ActionListener() {
+						public void actionPerformed(java.awt.event.ActionEvent e) {
+							uncheckAllButtonAction();
+						}
+					});
+		}
+		return jButtonIdxUncheckAll;
+	}
 
 	/**
 	 * This method initializes jSeparator
@@ -696,7 +753,7 @@ public class Config_Settings extends JFrame implements WindowListener{
 	private JSeparator getJSeparator() {
 		if (jSeparator == null) {
 			jSeparator = new JSeparator();
-			jSeparator.setBounds(new Rectangle(9, 216, 364, 10));
+			jSeparator.setBounds(new Rectangle(9, 278, 364, 10));
 		}
 		return jSeparator;
 	}
@@ -788,10 +845,6 @@ public class Config_Settings extends JFrame implements WindowListener{
 			jPanel3.add(getJCheckBoxCFbhav(), null);
 			jPanel3.add(jLabel13, null);
 			currFuturesfileChooser = new RJFileChooser();
-//			currFuturesfileChooser
-//					.setDefaultDirectory(System.getProperty("user.dir")
-//							+ System.getProperty("file.separator")
-//							+ "Currency Futures");
 			currFuturesfileChooser.setTextAreaColumns(30);
 			currFuturesfileChooser.setBounds(13, 106, 348, 33);
 			jPanel3.add(currFuturesfileChooser);
@@ -977,8 +1030,6 @@ public class Config_Settings extends JFrame implements WindowListener{
 			jPanel5.add(getJCheckBoxLogging(), null);
 			jPanel5.add(getJCheckBoxAppEqFu(), null);
 			eodFileChooser = new RJFileChooser();
-//			eodFileChooser.setDefaultDirectory(System.getProperty("user.dir")
-//					+ System.getProperty("file.separator") + "Eod");
 			eodFileChooser.setTextAreaColumns(30);
 			eodFileChooser.setBounds(198, 75, 318, 33);
 			jPanel5.add(eodFileChooser);
@@ -1008,8 +1059,8 @@ public class Config_Settings extends JFrame implements WindowListener{
 	private JCheckBox getJCheckBoxLogging() {
 		if (jCheckBoxLogging == null) {
 			jCheckBoxLogging = new JCheckBox();
-			jCheckBoxLogging.setBounds(new Rectangle(12, 57, 124, 21));
-			jCheckBoxLogging.setText("Enable Logging");
+			jCheckBoxLogging.setBounds(new Rectangle(12, 57, 150, 21));
+			jCheckBoxLogging.setText("Enable Verbose Logging");
 		}
 		return jCheckBoxLogging;
 	}
@@ -1334,9 +1385,19 @@ public class Config_Settings extends JFrame implements WindowListener{
 			}
 		}
 	}
+	
+	private void uncheckAllButtonAction() {
+
+		for (int i = 0; i < jPanel.getComponentCount(); i++) {
+			if (jPanel.getComponent(i).getClass().getSimpleName()
+					.equalsIgnoreCase("JCheckBox")) {
+				((JCheckBox) jPanel.getComponent(i)).setSelected(false);
+			}
+		}
+	}
 
 	public void showConfig_Settings(JFrame callingFrame) {
-		logging.getLogger().log("in show config");
+		Logging.getLogger().log("in show config");
 		this.setVisible(true);
 		this.callingFrame = callingFrame;
 		callingFrame.setEnabled(false);
@@ -1386,36 +1447,36 @@ public class Config_Settings extends JFrame implements WindowListener{
 	private void restoreSettings(JComponent jTabbedPane) {
 		// Download
 		// Index
-		Settings settings= SettingsFactory.getSettings();
-		JPanel download = (JPanel) Common_functions.getComponentByName(true,
+		Settings settings= Settings.getSettings();
+		JPanel download = (JPanel) CommonFunctions.getComponentByName(true,
 				jTabbedPane, "download");
-		JPanel index = (JPanel) Common_functions.getComponentByName(true,
+		JPanel index = (JPanel) CommonFunctions.getComponentByName(true,
 				download, "index");
 		restoreDownloadPanelBaseSettings(settings.getDownload().getIndex(),
 				index);
 		// Equity
-		JPanel equity = (JPanel) Common_functions.getComponentByName(true,
+		JPanel equity = (JPanel) CommonFunctions.getComponentByName(true,
 				download, "equity");
 		restoreDownloadPanelBaseSettings(settings.getDownload().getEquity(),
 				equity);
 		// Futures
-		JPanel futures = (JPanel) Common_functions.getComponentByName(true,
+		JPanel futures = (JPanel) CommonFunctions.getComponentByName(true,
 				download, "futures");
 		restoreDownloadPanelBaseSettings(settings.getDownload().getFutures(),
 				futures);
 		// CurrencyFutures
-		JPanel currencyfutures = (JPanel) Common_functions.getComponentByName(
+		JPanel currencyfutures = (JPanel) CommonFunctions.getComponentByName(
 				true, download, "currencyfutures");
 		restoreDownloadPanelBaseSettings(settings.getDownload().getCurrencyfutures(),
 				currencyfutures);
 		// Options
-		JPanel options = (JPanel) Common_functions.getComponentByName(true,
+		JPanel options = (JPanel) CommonFunctions.getComponentByName(true,
 				download, "options");
 		restoreDownloadPanelBaseSettings(settings.getDownload().getOptions(),
 				options);
 
 		// Other options
-		JPanel others = (JPanel) Common_functions.getComponentByName(true,
+		JPanel others = (JPanel) CommonFunctions.getComponentByName(true,
 				jTabbedPane, "others");
 		restoreOtherSettings(settings.getOthers(), others);
 	}
@@ -1461,19 +1522,19 @@ public class Config_Settings extends JFrame implements WindowListener{
 	// Aggregates the entire data
 	private Download saveDownloadPanelSettings(JPanel download) {
 		Download downloadData = new Download();
-		JPanel index = (JPanel) Common_functions.getComponentByName(true,
+		JPanel index = (JPanel) CommonFunctions.getComponentByName(true,
 				download, "index");
 		DownloadPanelBase indexData = saveDownloadPanelData(index);
-		JPanel equity = (JPanel) Common_functions.getComponentByName(true,
+		JPanel equity = (JPanel) CommonFunctions.getComponentByName(true,
 				download, "equity");
 		DownloadPanelBase equityData = saveDownloadPanelData(equity);
-		JPanel futures = (JPanel) Common_functions.getComponentByName(true,
+		JPanel futures = (JPanel) CommonFunctions.getComponentByName(true,
 				download, "futures");
 		DownloadPanelBase futuresData = saveDownloadPanelData(futures);
-		JPanel currencyFutures = (JPanel) Common_functions.getComponentByName(
+		JPanel currencyFutures = (JPanel) CommonFunctions.getComponentByName(
 				true, download, "currencyfutures");
 		DownloadPanelBase currencyFuturesData = saveDownloadPanelData(currencyFutures);
-		JPanel options = (JPanel) Common_functions.getComponentByName(true,
+		JPanel options = (JPanel) CommonFunctions.getComponentByName(true,
 				download, "options");
 		DownloadPanelBase optionsData = saveDownloadPanelData(options);
 		downloadData.setIndex(indexData);
@@ -1532,10 +1593,10 @@ public class Config_Settings extends JFrame implements WindowListener{
 	}
 	
 	private void updateSettingsModel(JComponent jTabbedPane) throws Exception {
-		Settings settings = SettingsFactory.getSettings();
-		JPanel download = (JPanel) Common_functions.getComponentByName(true,
+		Settings settings = Settings.getSettings();
+		JPanel download = (JPanel) CommonFunctions.getComponentByName(true,
 				jTabbedPane, "download");
-		JPanel others = (JPanel) Common_functions.getComponentByName(true,
+		JPanel others = (JPanel) CommonFunctions.getComponentByName(true,
 				jTabbedPane, "others");
 		settings.setDownload(saveDownloadPanelSettings(download));
 		settings.setOthers(saveOtherPanelSettings(others));

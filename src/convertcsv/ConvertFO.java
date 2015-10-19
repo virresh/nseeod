@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2011,2012,2013 Rohit Jhunjhunwala
+Copyright (c) 2011,2012,2013,2014 Rohit Jhunjhunwala
 
 The program is distributed under the terms of the GNU General Public License
 
@@ -28,32 +28,31 @@ import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.List;
 
-import commonfunctions.Common_functions;
+import commonfunctions.CommonFunctions;
 
 import config.configxml.Settings;
-import config.configxml.SettingsFactory;
 
-public class Convert_FO extends ConvertFile{
+public class ConvertFO extends ConvertFile{
 
 	/**
 	 * @param args
 	 * @throws Exception 
 	 */
-	public File convert_fo(String filePath) throws Exception {
+	public File convertToDesiredFormat(String filePath) throws Exception {
 		
-		Settings settings= SettingsFactory.getSettings();
+		Settings settings= Settings.getSettings();
 		String date=filePath.substring(filePath.length()-17, filePath.length()-8);
 	    //READ FILE
 		FileReader reader=new FileReader(filePath);
 		FileWriter writer =null;
 		BufferedReader bufferReader=new BufferedReader(reader);
-		String futuresDir= SettingsFactory.getSettings().getDownload().getFutures().getDirectory();
+		String futuresDir= Settings.getSettings().getDownload().getFutures().getDirectory();
 		File convertedFile = new File(futuresDir+"/FU_"+date+".txt");
 		convertedFile.getParentFile().mkdirs();
 		writer=new FileWriter(convertedFile);
 		PrintWriter printWriter=new PrintWriter(writer);
 		String line=bufferReader.readLine();
-		String previous_stock=null;
+		String previousStock=null;
 		int count=1;
 		while((line=bufferReader.readLine())!=null)
 		{
@@ -61,16 +60,15 @@ public class Convert_FO extends ConvertFile{
 			if(row.get(0).replaceAll(" ", "").equals("FUTIDX") || row.get(0).replaceAll(" ", "").equals("FUTSTK"))
 			{
 				String curr_stock=(String) row.get(1).replaceAll(" ", "");
-			if(previous_stock==null || !(previous_stock.equals(curr_stock))){
-				previous_stock=curr_stock;
+			if(previousStock==null || !(previousStock.equals(curr_stock))){
+				previousStock=curr_stock;
 				count=1;
 				}
-			//TODO replace the description with check box name and change the XML accordingly.Planned for future release.
-				curr_stock=stock_name(curr_stock, count,Common_functions.isChkBoxSelected(settings.getDownload().getFutures().getCheckboxes(),"Add (-I) as prefix"));
+				curr_stock=addPrefixSuffixToCurrencyName(curr_stock, count,CommonFunctions.isChkBoxSelected(settings.getDownload().getFutures().getCheckboxes(),"Add (-I) as prefix"));
 				count++;
 			
 			String line2=curr_stock+","+//Stock name
-			database_date(date)+","+//Date YYYYMMDD
+			convertToDate(date)+","+//Date YYYYMMDD
 			row.get(5).replaceAll(" ", "")+","+//Open
 			row.get(6).replaceAll(" ", "")+","+//High
 			row.get(7).replaceAll(" ", "")+","+//Low
@@ -94,7 +92,7 @@ public class Convert_FO extends ConvertFile{
 	
 	
 	//New function added which will add -I,-II,-III Defect ID::3197916
-	public static String stock_name(String stock,int count,Boolean prefix){
+	private String addPrefixSuffixToCurrencyName(String stock,int count,Boolean prefix){
 		String var="";
 		for(int i=1;i<=count;i++)
 		{

@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2011,2012,2013 Rohit Jhunjhunwala
+Copyright (c) 2011,2012,2013,2014 Rohit Jhunjhunwala
 
 The program is distributed under the terms of the GNU General Public License
 
@@ -22,34 +22,29 @@ package downloadfiles;
 
 import java.io.File;
 
-import logging.logging;
+import logging.Logging;
 import unzipfiles.UnzipFiles;
 
 public class OtherFiles extends DownloadFile {
 
-	private logging logger=logging.getLogger();
+	private Logging logger=Logging.getLogger();
 	
 	public boolean downloadOtherReports(String type,String date,String typeName){
 		boolean success;
 		try {
-		logger.log("<OTHER REPORTS>");
 		logger.log("Starting Other reports download");
-//		downloadFiles.post_data("cmprzip", date,
-//				jTextArea, "Other Reports");
-		postDataOnArchive("cmprzip", date,
-				 "Other Reports");
+		logger.sendMessageToDisplay("Other Reports");
 		File outputFile=download_zip("cmprzip",
 				date);
 		if(outputFile==null)
 		{
-			logger.log("Cannot find Futures Bhavcopy for the day " + date,true);
+			logger.log("Cannot find other reports for the day " + date,true);
 		}
 		else{
-			new UnzipFiles().unzip_files(outputFile);
+			new UnzipFiles().unzipFiles(outputFile);
 			outputFile.delete();
 		}
 		logger.log("Completed Other reports download");
-		logger.log("</OTHER REPORTS>");
 		success=true;
 		} catch (Exception e) {
 			logger.log(e, "Error while downloading Other reports for the day "

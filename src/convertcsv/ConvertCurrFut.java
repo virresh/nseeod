@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2011,2012,2013 Rohit Jhunjhunwala
+Copyright (c) 2011,2012,2013,2014 Rohit Jhunjhunwala
 
 The program is distributed under the terms of the GNU General Public License
 
@@ -28,21 +28,22 @@ import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.List;
 
-import commonfunctions.Common_functions;
+import commonfunctions.CommonFunctions;
+import config.configxml.Settings;
 
-public class Convert_Curr_Fut{
-	public static void convert_curr_fu(String filePath,String destinationDirectory) throws Exception
+public class ConvertCurrFut extends ConvertFile{
+	public File convertToDesiredFormat(String filePath) throws Exception
 	{
-		
 		String date=filePath.substring(filePath.length()-12,filePath.length()-4);
 		FileReader reader=new FileReader(filePath);
 		BufferedReader bufferReader=new BufferedReader(reader);
-		File convertedFile= new File(destinationDirectory+"/Curr_"+Common_functions.getDateFormat(date, Common_functions.DDMMYYYYFormat, Common_functions.DDMMMYYYYFormat)+".txt");
+		String destinationDirectory=Settings.getSettings().getDownload().getCurrencyfutures().getDirectory();
+		File convertedFile= new File(destinationDirectory+"/Curr_"+CommonFunctions.getDateFormat(date, CommonFunctions.DDMMYYYYFormat, CommonFunctions.DDMMMYYYYFormat)+".txt");
 		convertedFile.getParentFile().mkdirs();
 		FileWriter writer=new FileWriter(convertedFile);
 		PrintWriter printWriter=new PrintWriter(writer);
 		String line=bufferReader.readLine();
-		String previous_stock=null;
+		String previousStock=null;
 		int count=1;
 		while((line=bufferReader.readLine())!=null)
 		{
@@ -50,15 +51,15 @@ public class Convert_Curr_Fut{
 			if(row.get(0).replaceAll(" ","").equals("FUTCUR"))
 			{
 				String curr_stock=((String) row.get(1)).replaceAll(" ", ""); //Using replaceAll to remove additional white spaces
-				if(previous_stock==null || !(previous_stock.equals(curr_stock)))
+				if(previousStock==null || !(previousStock.equals(curr_stock)))
 				{
-					previous_stock=curr_stock;
+					previousStock=curr_stock;
 					count=1;
 				}
-				curr_stock=stock_name(curr_stock, count);
+				curr_stock=addSuffixToCurrencyName(curr_stock, count);
 				count++;
 				String line2=curr_stock+","+ //stock name
-				database_date(date)+","+ //date YYYYMMDD
+				CommonFunctions.getDateFormat(date,CommonFunctions.DDMMYYYYFormat, CommonFunctions.YYYYMMDDformat)+","+ //date YYYYMMDD
 				row.get(3).replaceAll(" ", "")+","+//Open
 				row.get(4).replaceAll(" ", "")+","+//High
 				row.get(5).replaceAll(" ", "")+","+//Low
@@ -72,16 +73,13 @@ public class Convert_Curr_Fut{
 				continue;
 			}
 		}
-		//printWriter.println();
 		printWriter.close();
 		bufferReader.close();
+		return convertedFile;
 	}
-	public static String database_date(String date){
-			date=date.substring(4, 8)+date.substring(2,4)+date.substring(0, 2);
-		return date;
-	}
+	
 	//New function added which will add -I,-II,-III Defect ID::3197916
-	public static String stock_name(String stock,int count){
+	private String addSuffixToCurrencyName(String stock,int count){
 		String var="";
 		for(int i=1;i<=count;i++)
 		{var=var+"I";}

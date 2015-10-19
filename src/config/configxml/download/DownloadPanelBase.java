@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2011,2012,2013 Rohit Jhunjhunwala
+Copyright (c) 2011,2012,2013,2014 Rohit Jhunjhunwala
 
 The program is distributed under the terms of the GNU General Public License
 
@@ -20,14 +20,20 @@ along with NSE EOD Data Downloader.  If not, see <http://www.gnu.org/licenses/>.
  */
 package config.configxml.download;
 
+import java.io.File;
+
 import config.configxml.CheckBoxHolder;
 
-//This class contains 
 public class DownloadPanelBase extends CheckBoxHolder {
 	
 	private String directory;
 
 	public String getDirectory() {
+		if(directory !=null && !directory.equals("")){
+		File file = new File(directory);
+		if(!file.exists())
+			file.mkdirs();
+		}
 		return directory;
 	}
 

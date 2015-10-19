@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2011,2012,2013 Rohit Jhunjhunwala
+Copyright (c) 2011,2012,2013,2014 Rohit Jhunjhunwala
 
 The program is distributed under the terms of the GNU General Public License
 
@@ -20,17 +20,21 @@ along with NSE EOD Data Downloader.  If not, see <http://www.gnu.org/licenses/>.
  */
 package convertcsv;
 
-import commonfunctions.Common_functions;
+import java.io.File;
 
-public class ConvertFile {
+import commonfunctions.CommonFunctions;
 
-	public String database_date(String date) throws Exception{
+public abstract class ConvertFile {
+
+	protected String convertToDate(String date) throws Exception{
 		try{
-		return Common_functions.getDateFormat(date,Common_functions.DDMMMYYYYFormat, Common_functions.YYYYMMDDformat);
+		return CommonFunctions.getDateFormat(date,CommonFunctions.DDMMMYYYYFormat, CommonFunctions.YYYYMMDDformat);
 		}
 		catch(Exception e)
 		{
 			throw e;
 		}
 	}
+	
+	public abstract File convertToDesiredFormat(String filePath) throws Exception;
 }

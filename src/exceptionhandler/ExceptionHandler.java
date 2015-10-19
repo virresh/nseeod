@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2011,2012,2013 Rohit Jhunjhunwala
+Copyright (c) 2011,2012,2013,2014 Rohit Jhunjhunwala
 
 The program is distributed under the terms of the GNU General Public License
 
@@ -22,14 +22,20 @@ package exceptionhandler;
 
 import javax.swing.JOptionPane;
 
-import logging.logging;
+import logging.Logging;
 
 public class ExceptionHandler {
 
-	private static logging logger = logging.getLogger();
+	private static Logging logger = Logging.getLogger();
 	
+	//Need to add functionality that will send mail to support
 	public static void showException(Exception e){
-		new JOptionPane("An unknown has occured").createDialog("").setVisible(true);
+		new JOptionPane("An error has occured").createDialog("").setVisible(true);
 		logger.log(e);
+	}
+	
+	public static void showException(Exception e,String message){
+		new JOptionPane(message).createDialog("").setVisible(true);
+		logger.log(e,message);
 	}
 }

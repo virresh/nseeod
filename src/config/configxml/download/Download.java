@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2011,2012,2013 Rohit Jhunjhunwala
+Copyright (c) 2011,2012,2013,2014 Rohit Jhunjhunwala
 
 The program is distributed under the terms of the GNU General Public License
 
@@ -26,6 +26,7 @@ public class Download {
 	private DownloadPanelBase equity;
 	private DownloadPanelBase futures;
 	private DownloadPanelBase currencyfutures;
+	private DownloadPanelBase options;
 	
 	public DownloadPanelBase getCurrencyfutures() {
 		return currencyfutures;
@@ -33,8 +34,6 @@ public class Download {
 	public void setCurrencyfutures(DownloadPanelBase currencyfutures) {
 		this.currencyfutures = currencyfutures;
 	}
-	private DownloadPanelBase options;
-	
 	public DownloadPanelBase getIndex() {
 		return index;
 	}

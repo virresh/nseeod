@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2011,2012,2013 Rohit Jhunjhunwala
+Copyright (c) 2011,2012,2013,2014 Rohit Jhunjhunwala
 
 The program is distributed under the terms of the GNU General Public License
 
@@ -44,20 +44,22 @@ import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
 import logging.DisplayLogMessageListener;
-import logging.logging;
+import logging.Logging;
 
 import org.jdesktop.swingx.JXDatePicker;
 
-
+import testconnection.CheckNews;
+import testconnection.CheckNewsListener;
 import testconnection.CheckUpdates;
 import testconnection.CheckUpdatesListener;
 import testconnection.DateValidation;
 import testconnection.ValidateConnection;
 import testconnection.ValidateConnectionListener;
 
-import commonfunctions.Common_functions;
+import commonfunctions.CommonFunctions;
 
-import config.Config_Settings;
+import config.ConfigSettings;
+import db.DBExecutor;
 import downloadfiles.DownloadFileThread;
 import downloadfiles.DownloadFilesListener;
 import dto.CheckUpdatesDTO;
@@ -65,7 +67,7 @@ import dto.ValidationDTO;
 import exceptionhandler.ExceptionHandler;
 
 public class GUI extends JFrame implements ValidateConnectionListener,
-		CheckUpdatesListener, DownloadFilesListener,DisplayLogMessageListener {
+		CheckUpdatesListener,CheckNewsListener, DownloadFilesListener,DisplayLogMessageListener {
 
 	private static final long serialVersionUID = 1L;
 	private JPanel jContentPane = null;
@@ -74,11 +76,9 @@ public class GUI extends JFrame implements ValidateConnectionListener,
 	private JButton jButtonDownload = null;
 	private JScrollPane jScrollPaneText = null;
 	private JTextArea jTextArea = null;
-	private static int threadRunning = 0;
-	private logging logger=logging.getLogger(); 
+	private Logging logger=Logging.getLogger(); 
 	private JLabel jLabelInternet = null;
 	private JLabel jLabelInternetState = null; // @jve:decl-index=0:visual-constraint="10,10"
-	private boolean connectionOK = false;
 	private JMenuBar jJMenuBar = null;
 	private JMenu jMenu1 = null;
 	private JMenuItem jMenuItem = null;
@@ -88,20 +88,32 @@ public class GUI extends JFrame implements ValidateConnectionListener,
 	private JMenuItem jMenuItem2 = null;
 	private JXDatePicker toDate = null;
 	private JXDatePicker fromDate = null;
-	private Config_Settings configSettingsWindow=null;
+	private ConfigSettings configSettingsWindow=null;
 	private JButton btnGetItNow;
+	private JLabel lblNewLabel;
 	/**
 	 * This is the default constructor
 	 */
 	public GUI() {
 		super();
 		initialize();
-		fromDate.setDate(Common_functions.getCurrentDateTime());
-		toDate.setDate(Common_functions.getCurrentDateTime());
+		logger.addDisplayMessageListener(this);
+		fromDate.setDate(CommonFunctions.getCurrentDateTime());
+		toDate.setDate(CommonFunctions.getCurrentDateTime());
 		getjLabelUpdate().setText("Checking for latest version");
+		if(new DBExecutor().checkForAnotherDBInstance()){
+			String message="Another instance of NSE EOD Data Downloader is already running";
+			new JOptionPane(message).createDialog("").setVisible(true);
+			logger.log(message);
+			System.exit(1);
+		}
+		else
+		{
 		new ValidateConnection(this);
 		new CheckUpdates(this);
-		logging.getLogger().setDisplayMessageListener(this);
+		new CheckNews(this);
+		
+		}
 	}
 
 	/**
@@ -121,19 +133,6 @@ public class GUI extends JFrame implements ValidateConnectionListener,
 		this.setLocation(200, 200);
 		this.setResizable(false);
 
-	}
-
-	/**
-	 * This method initializes connectionOK
-	 * 
-	 * @return boolean
-	 */
-	public void setConnectionOK(boolean connectionOK) {
-		this.connectionOK = connectionOK;
-	}
-
-	private boolean getConnectionOK() {
-		return connectionOK;
 	}
 
 	/**
@@ -175,6 +174,10 @@ public class GUI extends JFrame implements ValidateConnectionListener,
 			btnGetItNow.setBounds(200, 406, 101, 23);
 			btnGetItNow.setVisible(false);
 			jContentPane.add(btnGetItNow);
+			
+			lblNewLabel = new JLabel("");
+			lblNewLabel.setBounds(0, 62, 715, 14);
+			jContentPane.add(lblNewLabel);
 		}
 		return jContentPane;
 	}
@@ -222,33 +225,31 @@ public class GUI extends JFrame implements ValidateConnectionListener,
 			jButtonDownload
 					.addActionListener(new java.awt.event.ActionListener() {
 						public void actionPerformed(java.awt.event.ActionEvent e) {
-							if (getConnectionOK()) {
-								if (getThreadRunning() == 0) {
+								if (jMenu0.isEnabled()) {
 									if (validateDate() == 1) {
-										GUI.setThreadRunning(1);
 										jTextArea.setText("");
-										jMenu0.setEnabled(false);// Disable the
-																	// settings
-																	// menu
-																	// before
-										// starting download
+										jMenu0.setEnabled(false);// Disable the settings menu before starting download
 										//Will be replaced by Swing Worker thread in the later version
+										//Need to switch to JRE 1.6 to use Swing Worker, which will take time considering the target consumers of this application
 										new DownloadFileThread(
 												getStringFromDate(),
 												getStringToDate(),
 												getDownloadFilesListener());
 									}
 								}
-							} else {
-								JOptionPane.showMessageDialog(null,
-										"Please check the Internet Connection",
-										"Error",
-										JOptionPane.INFORMATION_MESSAGE);
-							}
+								else{
+									showDownloadRunningMessage();
+								}
+						
 						}
 					});
 		}
 		return jButtonDownload;
+	}
+	
+	private void showDownloadRunningMessage(){
+		JOptionPane.showConfirmDialog(this,
+				"Another download is in progress","Error",JOptionPane.PLAIN_MESSAGE);
 	}
 
 	protected int validateDate() {
@@ -257,7 +258,7 @@ public class GUI extends JFrame implements ValidateConnectionListener,
 				fromDate.getDate(), toDate.getDate());
 		if (!validation.isSuccess())
 			JOptionPane.showMessageDialog(null, validation.getMessage(),
-					"Error", JOptionPane.ERROR_MESSAGE);
+					"Error", JOptionPane.PLAIN_MESSAGE);
 		return validate;
 	}
 
@@ -374,17 +375,7 @@ public class GUI extends JFrame implements ValidateConnectionListener,
 		return jMenuItem1;
 	}
 
-	public static void setThreadRunning(int threadRunning) {
-		GUI.threadRunning = threadRunning;
-	}
-
-	public static int getThreadRunning() {
-		return GUI.threadRunning;
-	}
-
 	private void doActionConfig() {
-		// Config_Settings settings = Config_Settings.getInstance();
-		// settings.showConfig_Settings(this);
 		try {
 			configSettingsWindow=getConfigSettingsWindow();
 			configSettingsWindow.showConfig_Settings(this);
@@ -399,9 +390,9 @@ public class GUI extends JFrame implements ValidateConnectionListener,
 
 	@Override
 	public void dispose() {
-		logging.getLogger().log("Dispose called on GUI.java");
+		Logging.getLogger().log("Dispose called on GUI.java");
 		setVisible(true);
-		if (getThreadRunning() == 1) // Check if download is in progress
+		if (!jMenu0.isEnabled()) // Check if download is in progress
 		{
 			int option = JOptionPane.showConfirmDialog(this,
 					"Download is in progress\nAre you sure you want to quit",
@@ -409,14 +400,15 @@ public class GUI extends JFrame implements ValidateConnectionListener,
 					JOptionPane.INFORMATION_MESSAGE);
 			if (option == JOptionPane.YES_OPTION) {
 				super.dispose();
-				logging.getLogger().log("Fatal error :: User Interrupted");
+				Logging.getLogger().log("Fatal error :: User Interrupted");
+				//All background thread will be automatically killed
 				System.exit(0);
 			} else {
 				setVisible(true);
 			}
 		} else {
 			super.dispose();
-			logging.getLogger().log("Fatal error :: User Interrupted");
+			Logging.getLogger().log("Application closed");
 			System.exit(0);
 		}
 	}
@@ -444,12 +436,11 @@ public class GUI extends JFrame implements ValidateConnectionListener,
 	}
 
 	public String getStringFromDate() {
-		return Common_functions.getDDMMYYYYDate(fromDate.getDate());
-
+		return CommonFunctions.getDDMMYYYYDate(fromDate.getDate());
 	}
 
 	public String getStringToDate() {
-		return Common_functions.getDDMMYYYYDate(toDate.getDate());
+		return CommonFunctions.getDDMMYYYYDate(toDate.getDate());
 	}
 
 	public void connectionValidationCompleted(final boolean isConnectionOk) {
@@ -459,12 +450,10 @@ public class GUI extends JFrame implements ValidateConnectionListener,
 					jButtonDownload.setEnabled(true);
 					getjLabelInternetState().setText("OK");
 					getjLabelInternetState().setForeground(new Color(34,139,34));
-					setConnectionOK(true);
 				} else {
 					jButtonDownload.setEnabled(false);
 					getjLabelInternetState().setText("OFF");
 					getjLabelInternetState().setForeground(Color.RED);
-					setConnectionOK(false);
 				}
 				getjLabelInternetState().setFont(getjLabelUpdate().getFont().deriveFont(Font.BOLD));
 			}
@@ -525,17 +514,31 @@ public class GUI extends JFrame implements ValidateConnectionListener,
 			}});
 	}
 	
-	public Config_Settings getConfigSettingsWindow() throws Exception{
+	public ConfigSettings getConfigSettingsWindow() throws Exception{
 		try{
 		if(configSettingsWindow==null)
 			{
-			configSettingsWindow=new Config_Settings();
+			configSettingsWindow=new ConfigSettings();
 			}
 		return configSettingsWindow;
 		}catch(Exception e)
 		{
-			logger.log(e);
+			logger.log(e,"Error while initializing config windows");
 			throw e;
 		}
+	}
+
+	@Override
+	public void checkNewsCompleted(final CheckUpdatesDTO checkUpdateResult) {
+		SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+				lblNewLabel.setFont(lblNewLabel.getFont().deriveFont(Font.BOLD));
+				if(checkUpdateResult.isSuccessful())
+					lblNewLabel.setForeground(new Color(34,139,34));
+				else
+					lblNewLabel.setForeground(Color.RED);
+				new Marquee(lblNewLabel, 250,checkUpdateResult.getMessage() ).start();
+			}});
+		
 	}
 } // @jve:decl-index=0:visual-constraint="53,35"

@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2011,2012,2013 Rohit Jhunjhunwala
+Copyright (c) 2011,2012,2013,2014 Rohit Jhunjhunwala
 
 The program is distributed under the terms of the GNU General Public License
 
@@ -20,28 +20,23 @@ along with NSE EOD Data Downloader.  If not, see <http://www.gnu.org/licenses/>.
  */
 package config;
 
-import java.io.File;
-import java.io.FileWriter;
-
-import com.thoughtworks.xstream.XStream;
-import com.thoughtworks.xstream.io.xml.DomDriver;
-
-import config.configxml.CheckBox;
 import config.configxml.Settings;
-import config.configxml.SettingsFactory;
+import config.configxml.download.Download;
+import config.configxml.download.DownloadPanelBase;
+import config.configxml.others.Others;
+import db.DBExecutor;
 
-public class ActionXStream {
+public class ConfigRW {
 
-	/**
-	 * @param args
-	 */
-
-	public Settings readConfigFile(){
-		XStream xstream= new XStream(new DomDriver());
-		xstream.alias("checkbox", CheckBox.class);
-		xstream.alias("settings", Settings.class);
-		File file= new File(System.getProperty("user.dir")+System.getProperty("file.separator")+"config.xml");
-		Settings settings=(Settings)xstream.fromXML(file);
+	public Settings readConfig(Settings settings) throws Exception{
+		settings.setDownload(new Download());
+		settings.getDownload().setIndex(new DownloadPanelBase());
+		settings.getDownload().setCurrencyfutures(new DownloadPanelBase());
+		settings.getDownload().setEquity(new DownloadPanelBase());
+		settings.getDownload().setFutures(new DownloadPanelBase());
+		settings.getDownload().setOptions(new DownloadPanelBase());
+		settings.setOthers(new Others());
+		new DBExecutor().readAllSettings(settings);
 		if(settings.getDownload().getEquity().getDirectory()==null || settings.getDownload().getEquity().getDirectory().equalsIgnoreCase(""))
 		{
 			settings.getDownload().getEquity().setDirectory(System.getProperty("user.dir")+System.getProperty("file.separator")+"Equity");
@@ -65,19 +60,8 @@ public class ActionXStream {
 		return settings;
 	}
 	
-	public void writeConfigFile() throws Exception {
-		Settings settings=SettingsFactory.getSettings();
-		XStream xstream = new XStream(new DomDriver());
-		xstream.alias("settings", Settings.class);
-		xstream.alias("checkbox", CheckBox.class);
-		FileWriter file = new FileWriter(System.getProperty("user.dir")
-				+ "/config.xml");
-		xstream.toXML(settings, file);
+	public void writeConfig() throws Exception {
+		Settings settings=Settings.getSettings();
+		new DBExecutor().updateAllSettings(settings);
 	}
-	
-	// Saves each tab data
-	// Right now every thing is merged into single function since the UI is same
-	// for all the panels
-	// In future when the UI will not be same across all panels then functions
-	// will have diff implementations..may be standalone impl classes
 }

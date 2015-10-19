@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2011,2012,2013 Rohit Jhunjhunwala
+Copyright (c) 2011,2012,2013,2014 Rohit Jhunjhunwala
 
 The program is distributed under the terms of the GNU General Public License
 
@@ -20,60 +20,32 @@ along with NSE EOD Data Downloader.  If not, see <http://www.gnu.org/licenses/>.
  */
 package downloadfiles;
 
-import static commonfunctions.Common_functions.isChkBoxSelected;
-import logging.logging;
+import static commonfunctions.CommonFunctions.isChkBoxSelected;
+import logging.Logging;
 import config.configxml.Settings;
-import config.configxml.SettingsFactory;
-import convertcsv.Convert_Curr_Fut;
+import convertcsv.ConvertCurrFut;
 
 public class CurrencyFuturesFiles extends DownloadFile {
 	
 	
-	private logging logger=logging.getLogger();
+	private Logging logger=Logging.getLogger();
 
-	public  void curr_futureCheckBoxDownload(String toDate) {
+	public  void currFutureCheckBoxDownload(String toDate){
 		// -------------------------CURRENCT FUTURE CHECKBOX START-------------
-		Settings settings= SettingsFactory.getSettings();
-		//Discontinued this product from NSE
-//		if (settings.getjCheckBoxCFMAR().isSelected()) // Currency Futures MAR
-//		if(Common_functions.isChkBoxSelected(settings.getDownload().getCurrencyfutures().getCheckboxes(),"Market Activity Report"))
-//		{
-//			String fileDate = toDate.substring(0, 2) + toDate.substring(3, 5)
-//					+ toDate.substring(6, 10);
-//			try {
-//				logger.sendMessageToDisplay("Currency Futures MAR");
-//				logger.log("Starting Currency Futures MAR download");
-////				copyFile(System.getProperty("user.dir") + "/temp/cd" + fileDate
-////						+ ".doc", settings.getCurrFuturesfileChooser().getSelectedDirectory()
-////						+"/Currency Future MAR_"
-////						+ generateDate(toDate) + ".doc");
-//				FileUtil.copyFileBinary(System.getProperty("user.dir") + "/temp/cd" + fileDate
-//						+ ".doc", settings.getDownload().getCurrencyfutures().getDirectory()
-//						+"/Currency Future MAR_"
-//						+ generateDate(toDate) + ".doc");
-//				logger.log("Completed Currency Futures MAR download");
-//			} catch (IOException e) {
-//				logger.log("Cannot find Currency Futures MAR for the day "
-//						+ toDate,true);
-//				logger.log(e.getMessage());
-//			}
-//		}
-//		if (settings.getjCheckBoxCFbhav().isSelected()) // Currency Futures
-														// Bhavcopy
-			if (isChkBoxSelected(settings.getDownload().getCurrencyfutures().getCheckboxes(),"Currency Futures Bhavcopy")) // Currency Futures
+		Settings settings= Settings.getSettings();
+		if (isChkBoxSelected(settings.getDownload().getCurrencyfutures().getCheckboxes(),"Currency Futures Bhavcopy")) // Currency Futures
 				// Bhavcopy
 		{
 			String fileDate = toDate.substring(0, 2) + toDate.substring(3, 5)
 					+ toDate.substring(6, 10);
 			try {
 				logger.log("Starting Currency Futures Bhavcopy download","Currency Futures Bhavcopy");
-				Convert_Curr_Fut.convert_curr_fu(System.getProperty("user.dir")
-						+ "/temp/cf" + fileDate + ".csv",settings.getDownload().getCurrencyfutures().getDirectory());
+				new ConvertCurrFut().convertToDesiredFormat(System.getProperty("user.dir")
+						+ "/temp/cf" + fileDate + ".csv");
 				logger.log("Completed Currency Futures Bhavcopy download");
 			} catch (Exception e) {
-				logger.log("Cannot find Currency Futures Bhavcopy for the day "
+				logger.log(e,"Cannot find Currency Futures Bhavcopy for the day "
 								+ toDate,true);
-				logger.log(e);
 			}
 		}
 		// -------------------------CURRENCT FUTURE CHECKBOX END---------------

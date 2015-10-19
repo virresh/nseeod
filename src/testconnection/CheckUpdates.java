@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2011,2012,2013 Rohit Jhunjhunwala
+Copyright (c) 2011,2012,2013,2014 Rohit Jhunjhunwala
 
 The program is distributed under the terms of the GNU General Public License
 
@@ -20,18 +20,11 @@ along with NSE EOD Data Downloader.  If not, see <http://www.gnu.org/licenses/>.
  */
 package testconnection;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
 
+import downloadfiles.DownloadFile;
 import dto.CheckUpdatesDTO;
 
 public class CheckUpdates implements Runnable {
@@ -47,13 +40,17 @@ public class CheckUpdates implements Runnable {
 	public CheckUpdatesDTO checkLatestVersion() throws Exception{
 		CheckUpdatesDTO checkUpdatesResult = new CheckUpdatesDTO();
 		BufferedReader read = null;
+		String outputDir=System
+				.getProperty("user.dir")
+				+ "/Temp/";
+		String fileNameWithExtension = "version.txt";
+		DownloadFile downloader = new DownloadFile();
 		try {
-			readFile();
-			read = new BufferedReader(new FileReader(new File(System
-					.getProperty("user.dir")
-					+ "/Temp/version.txt")));
+			downloader.downloadFile(downloader.getLinks().getVersionLink(), outputDir, fileNameWithExtension);
+			read = new BufferedReader(new InputStreamReader(new FileInputStream(outputDir+fileNameWithExtension),"UTF-8"));
 			String version = read.readLine();
 			if (version != null) {
+				//for backward compatibility
 				version = version.substring(version.indexOf("-") + 1);// store
 				// the
 				// substring
@@ -83,62 +80,9 @@ public class CheckUpdates implements Runnable {
 			throw e;
 		} finally {
 			if (read != null)
-				try {
-					read.close();
-				} catch (IOException e) {
-					// do nothing
-				}
+				read.close();
 		}
 		return checkUpdatesResult;
-	}
-
-	public void readFile() throws Exception {
-		int data = -1;
-		String generateURL = "";
-
-		BufferedOutputStream fileWriter = null;
-		HttpURLConnection fileHttp = null;
-		BufferedInputStream fileReader = null;
-		try {
-			// SET THE DESTINATION ZIP FILE
-			// --------------------------------------------------------------
-			//
-			File tempFile = new File(System.getProperty("user.dir")
-					+ "/Temp/version.txt");
-			fileWriter = new BufferedOutputStream(
-					new FileOutputStream(tempFile));
-			// ---------------------------------------------------------------
-			// READ THE FILE
-			generateURL = "https://docs.google.com/document/d/1CJfTk3LVj_uY2-3MyCbWu3ie59E5DP4S_r5sa-b6jPI/export?format=txt&id=1CJfTk3LVj_uY2-3MyCbWu3ie59E5DP4S_r5sa-b6jPI&authkey=CPCd4a4F&tfe=yh_119";
-			URL file = null;
-
-			file = new URL(generateURL);
-			fileHttp = (HttpURLConnection) file.openConnection();
-			fileHttp
-					.setRequestProperty(
-							"user-agent",
-							"User Agent: Mozilla/5.0 (compatible; Konqueror/4.1; Linux) KHTML/4.1.3 (like Gecko) SUSE");
-			fileHttp.setDoInput(true);
-			fileReader = new BufferedInputStream(fileHttp.getInputStream());
-			while ((data = fileReader.read()) != -1) {
-				fileWriter.write(data);
-			}
-		} catch (FileNotFoundException e) {
-			throw new Exception(
-					"Could not create " + System.getProperty("user.dir")
-							+ "/Temp/version.txt file", e);
-		} catch (MalformedURLException e) {
-			throw new Exception("Version check link could not be reached", e);
-		} catch (IOException e) {
-			throw new Exception("Version check link could not be reached", e);
-		} finally {
-			if (fileWriter != null)
-				fileWriter.close();
-			if (fileReader != null)
-				fileReader.close();
-			if (fileHttp != null)
-				fileHttp.disconnect();
-		}
 	}
 
 	public void run() {

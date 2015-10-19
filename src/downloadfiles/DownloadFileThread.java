@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2011,2012,2013 Rohit Jhunjhunwala
+Copyright (c) 2011,2012,2013,2014 Rohit Jhunjhunwala
 
 The program is distributed under the terms of the GNU General Public License
 
@@ -20,33 +20,32 @@ along with NSE EOD Data Downloader.  If not, see <http://www.gnu.org/licenses/>.
  */
 package downloadfiles;
 
-import static commonfunctions.Common_functions.isChkBoxSelected;
+import static commonfunctions.CommonFunctions.isChkBoxSelected;
 
 import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.GregorianCalendar;
 
-import logging.logging;
-import maingui.GUI;
+import logging.Logging;
 
-import commonfunctions.Common_functions;
+import commonfunctions.CommonFunctions;
 import commonfunctions.FileUtil;
 
 import config.configxml.CheckBox;
-import config.configxml.SettingsFactory;
+import config.configxml.Settings;
 import config.configxml.download.DownloadPanelBase;
 import config.configxml.others.Others;
 
 public class DownloadFileThread implements Runnable {
 
-	private logging logger = logging.getLogger();
+	private Logging logger = Logging.getLogger();
 	private String jTextFrom = null;
 	private String jTextTo = null;
 	private DownloadFilesListener downloadFilesListener;
 	private Thread t;
+	private static final String LOGGING="Enable Verbose Logging";
 	private static final String SKIPWEEKENDS="Skip Weekends";
-	private static final String LOGGING="Enable Logging";
 	private static final String EQUITY_BHAVCOPY="Equity Bhavcopy";
 	private static final String FUTURES_BHAVCOPY="Futures Bhavcopy";
 	private static final String MAR="Market Activity Report";
@@ -71,23 +70,28 @@ public class DownloadFileThread implements Runnable {
 	}
 
 	public void run() {
-		startDownload();
+		try {
+			startDownload();
+		} catch (RuntimeException e) {
+			downloadFilesListener.downloadComplete();
+			logger.log(e,"An unknown error occured while downloading data", "Error occured while downloading");
+		}
 	}
 
 	public void startDownload() {
-		Others otherBase = SettingsFactory.getSettings().getOthers();
-		DownloadPanelBase equityBase = SettingsFactory.getSettings()
+		Others otherBase = Settings.getSettings().getOthers();
+		DownloadPanelBase equityBase = Settings.getSettings()
 				.getDownload().getEquity();
-		DownloadPanelBase futuresBase = SettingsFactory.getSettings()
+		DownloadPanelBase futuresBase = Settings.getSettings()
 				.getDownload().getFutures();
-		DownloadPanelBase currFuturesBase = SettingsFactory.getSettings()
+		DownloadPanelBase currFuturesBase = Settings.getSettings()
 				.getDownload().getCurrencyfutures();
-		DownloadPanelBase optionsBase = SettingsFactory.getSettings()
+		DownloadPanelBase optionsBase = Settings.getSettings()
 				.getDownload().getOptions();
 		Boolean prSelected = false;
 		Boolean prFlag = false;
-		// Set the logging flag
-		logger.setLogFlag(isChkBoxSelected(otherBase.getCheckboxes(),
+		// Set the verbose logging flag
+		logger.setVerboseLogFlag(isChkBoxSelected(otherBase.getCheckboxes(),
 				LOGGING));
 		String tempSymbol = generateIndexString();
 		String fromDate = jTextFrom;
@@ -95,10 +99,10 @@ public class DownloadFileThread implements Runnable {
 		GregorianCalendar fromCalendar = new GregorianCalendar();
 		GregorianCalendar toCalendar = new GregorianCalendar();
 		try {
-			fromCalendar.setTime(Common_functions.getStringToDate(fromDate,
-					Common_functions.DDMMYYYYhifenFormat));
-			toCalendar.setTime(Common_functions.getStringToDate(toDate,
-					Common_functions.DDMMYYYYhifenFormat));
+			fromCalendar.setTime(CommonFunctions.getStringToDate(fromDate,
+					CommonFunctions.DDMMYYYYhifenFormat));
+			toCalendar.setTime(CommonFunctions.getStringToDate(toDate,
+					CommonFunctions.DDMMYYYYhifenFormat));
 		} catch (Exception e) {
 			logger.sendMessageToDisplay("Enter date in correct format");
 			throw new RuntimeException();
@@ -109,8 +113,8 @@ public class DownloadFileThread implements Runnable {
 		EquityFiles equityFiles = new EquityFiles();
 		FuturesFiles futureFiles = new FuturesFiles();
 		while ((fromCalendar.compareTo(toCalendar)) <= 0) {
-			toDate = Common_functions.getDateFormat(fromCalendar.getTime(),
-					Common_functions.DDMMYYYYhifenFormat);
+			toDate = CommonFunctions.getDateFormat(fromCalendar.getTime(),
+					CommonFunctions.DDMMYYYYhifenFormat);
 			logger.log("Date : " + toDate);
 			if (isChkBoxSelected(otherBase.getCheckboxes(), SKIPWEEKENDS))
 			// Check if the Skip Weekend Box is Checked
@@ -159,11 +163,10 @@ public class DownloadFileThread implements Runnable {
 							FileUtil.copyFileTextMode(eqBhavcopy.getAbsolutePath(),
 									consolidatedBhavcopy.getAbsolutePath());
 						} catch (IOException e) {
-							logger.log(
+							logger.log(e,
 									"Could not append Equity Bhavcopy- IO Exception",
 									"Cannot find Equity Bhavcopy for the day "
 											+ toDate);
-							logger.log(e);
 						}
 					}
 					if (isChkBoxSelected(futuresBase.getCheckboxes(),
@@ -188,9 +191,9 @@ public class DownloadFileThread implements Runnable {
 			String stockSymbol[] = null;
 			if(!tempSymbol.equalsIgnoreCase(""))
 				stockSymbol=tempSymbol.split(",");
-			logger.log("<INDEXES>");
+			
 			new IndexFiles().downloadIndexData(stockSymbol, toDate);
-			logger.log("</INDEXES>");
+			
 			// ---------------------END DOWNLOAD DATA FOR INDEX--------------------
 			// DOWNLOAD EQUITY MARKET ACTIVITY REPORT
 			if (isChkBoxSelected(equityBase.getCheckboxes(),
@@ -233,7 +236,7 @@ public class DownloadFileThread implements Runnable {
 					equityFiles.equityCheckBoxDownload(toDate);
 					futureFiles.futureCheckBoxDownload(toDate);
 					CurrencyFuturesFiles currencyFuturesFiles = new CurrencyFuturesFiles();
-					currencyFuturesFiles.curr_futureCheckBoxDownload(toDate);
+					currencyFuturesFiles.currFutureCheckBoxDownload(toDate);
 					OptionsFiles optionsFiles = new OptionsFiles();
 					optionsFiles.optionsCheckBoxDownload(toDate);
 				} else {
@@ -254,24 +257,22 @@ public class DownloadFileThread implements Runnable {
 			fromCalendar.add(GregorianCalendar.DAY_OF_MONTH, 1);
 		}// END OF WHILE LOOP
 		logger.log("Download Complete", true);
-		GUI.setThreadRunning(0);
 		downloadFilesListener.downloadComplete();
-		// Enable the settings menu after
-		// finishing download
+		// Enable the settings menu after finishing download
 		logger.log("Ending download");
 	}
 
-	private String generateIndexString() {
-		CheckBox[] indexes = SettingsFactory.getSettings().getDownload()
+	private String generateIndexString()  {
+		CheckBox[] indexes = Settings.getSettings().getDownload()
 				.getIndex().getCheckboxes();
 		String temp = "";
 		for (int i = 0; i < indexes.length; i++) {
 			if (Boolean.valueOf(indexes[i].getValue())) {
 				if (temp.equalsIgnoreCase("")) {
-					temp += Common_functions.getIndexCode(indexes[i].getName());
+					temp += CommonFunctions.getIndexCode(indexes[i].getName());
 				} else
 					temp += ","
-							+ Common_functions.getIndexCode(indexes[i]
+							+ CommonFunctions.getIndexCode(indexes[i]
 									.getName());
 			}
 		}
@@ -282,7 +283,7 @@ public class DownloadFileThread implements Runnable {
 	private String generateDate(String toDate) {
 		String date = null;
 		try {
-			date = Common_functions.getDateFormat(toDate, "dd-MM-yyyy",
+			date = CommonFunctions.getDateFormat(toDate, "dd-MM-yyyy",
 					"ddMMMyyyy");
 		} catch (ParseException e) {
 			date = "";

@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2011,2012,2013 Rohit Jhunjhunwala
+Copyright (c) 2011,2012,2013,2014 Rohit Jhunjhunwala
 
 The program is distributed under the terms of the GNU General Public License
 
@@ -20,58 +20,54 @@ along with NSE EOD Data Downloader.  If not, see <http://www.gnu.org/licenses/>.
  */
 package downloadfiles;
 
-import static commonfunctions.Common_functions.isChkBoxSelected;
+import static commonfunctions.CommonFunctions.isChkBoxSelected;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 
-import logging.logging;
+import logging.Logging;
 import unzipfiles.UnzipFiles;
 
-import commonfunctions.Common_functions;
+import commonfunctions.CommonFunctions;
 import commonfunctions.FileUtil;
 
 import config.configxml.Settings;
-import config.configxml.SettingsFactory;
 import config.configxml.download.DownloadPanelBase;
-import convertcsv.Convert_EQ;
+import convertcsv.ConvertEQ;
 
 public class EquityFiles extends DownloadFile {
 	
-	private logging logger=logging.getLogger();
+	private Logging logger=Logging.getLogger();
 	
 	public File equityBhavcopyDownload(String toDate) {
 		File downloadedFile=null;
-		Settings settings= SettingsFactory.getSettings();
-//		if (settings.getjCheckBoxEqBhav().isSelected()) // Equities Bhavcopy
-		if (Common_functions.isChkBoxSelected(settings.getDownload().getEquity().getCheckboxes(),"Equity Bhavcopy"))// Equities Bhavcopy
+		Settings settings= Settings.getSettings();
+		if (CommonFunctions.isChkBoxSelected(settings.getDownload().getEquity().getCheckboxes(),"Equity Bhavcopy"))// Equities Bhavcopy
 		{
-			logger.log("<EQUITY>");
 			logger.log("Starting Equity Bhavcopy download");
 			try {
-//				downloadFiles.post_data("eqbhav", toDate,
-//						jTextArea, "Equities Bhavcopy");
-				postDataOnArchive("eqbhav", toDate,
-						 "Equities Bhavcopy");
+				logger.sendMessageToDisplay("Equities Bhavcopy");
 				File outputFile=download_zip("eqbhav", toDate);
+				
 				if(outputFile==null)
 				{
-					logger.log("Cannot find Bhavcopy for the day\nSkipping this Date " + toDate,true);
+					logger.log("Cannot find Bhavcopy for the day\r\nSkipping this Date " + toDate,true);
 				}
 				else{
-					List<File> extractedFiles=new UnzipFiles().unzip_files(outputFile);
+					List<File> extractedFiles=new UnzipFiles().unzipFiles(outputFile);
 					outputFile.delete();
-					downloadedFile=new Convert_EQ().convert_eq(extractedFiles.get(0).getAbsolutePath());
+					downloadedFile=new ConvertEQ().convertToDesiredFormat(extractedFiles.get(0).getAbsolutePath());
 					}
 				logger.log("Completed Equity Bhavcopy download");
-				logger.log("</EQUITY>");
+				
 			}
 			// Added this feature as of request number 3197092 posted by
 			// thenikxyz
 			
 			catch (Exception e) {
-				logger.log(e,"Error while downloading Bhavcopy for the day\nSkipping this Date " + toDate,true);
+				logger.log(e,"Error while downloading Bhavcopy for the day\r\nSkipping this Date " + toDate,true);
 				downloadedFile=null;
 			}
 		}
@@ -79,10 +75,9 @@ public class EquityFiles extends DownloadFile {
 	}
 	
 	public void equityCheckBoxDownload(String toDate) {
-		DownloadPanelBase settings= SettingsFactory.getSettings().getDownload().getEquity();
+		DownloadPanelBase settings= Settings.getSettings().getDownload().getEquity();
 		// ---------------------EQUITY CHECKBOX START -------------------
-//		if (settings.getjCheckBoxEQNHL().isSelected()) // New High or Low
-		if (Common_functions.isChkBoxSelected(settings.getCheckboxes(),"New High or Low")) // New High or Low
+		if (CommonFunctions.isChkBoxSelected(settings.getCheckboxes(),"New High or Low")) // New High or Low
 		{
 			String fileDate = toDate.substring(0, 2) + toDate.substring(3, 5)
 					+ toDate.substring(8, 10);
@@ -99,8 +94,7 @@ public class EquityFiles extends DownloadFile {
 						+ toDate,true);
 			}
 		}
-//		if ( settings.getjCheckBoxEQPBH().isSelected()) // Price Band Hit
-		if (Common_functions.isChkBoxSelected(settings.getCheckboxes(),"Price Bands Hit")) // Price Band Hit
+		if (CommonFunctions.isChkBoxSelected(settings.getCheckboxes(),"Price Bands Hit")) // Price Band Hit
 		{
 			String fileDate = toDate.substring(0, 2) + toDate.substring(3, 5)
 					+ toDate.substring(6, 10);
@@ -116,8 +110,6 @@ public class EquityFiles extends DownloadFile {
 						+ toDate ,true);
 			}
 		}
-//		if (settings.getjCheckBoxEQtop10GL().isSelected()) // Top 10 gainers &
-															// loosers
 			if (isChkBoxSelected(settings.getCheckboxes(),"Top 10 Gainers & Loosers")) // Top 10 gainers &
 				// loosers
 		{
@@ -138,8 +130,6 @@ public class EquityFiles extends DownloadFile {
 								+ toDate,true);
 			}
 		}
-//		if (settings.getjCheckBoxEQtop25sec().isSelected()) // Top 25 Trading
-															// values stocks
 		if (isChkBoxSelected(settings.getCheckboxes(),"Top 25 securities by Trading Values")) // Top 25 Trading
 				// values stocks
 		{
@@ -163,27 +153,23 @@ public class EquityFiles extends DownloadFile {
 		// ---------------------EQUITY CHECKBOX END--------------------------
 	}
 	
-	public void downloadEquityMAR(String toDate)// EQUITIES MAR
+	public void downloadEquityMAR(String date)// EQUITIES MAR
 	{
-		DownloadPanelBase settings= SettingsFactory.getSettings().getDownload().getEquity();
-//		if (settings.getjCheckBoxEQMAR().isSelected()) // EQUITIES MAR
+		DownloadPanelBase settings= Settings.getSettings().getDownload().getEquity();
 			if (isChkBoxSelected(settings.getCheckboxes(),"Market Activity Report")) // EQUITIES MAR
 		{
-//			String fileDate = toDate.substring(0, 2) + toDate.substring(3, 5)
-//					+ toDate.substring(6, 10);
 			try {
 				logger.log("Starting Equity MAR download");
-//				downloadFiles.post_data("eqmkt", toDate,
-//						jTextArea, "Equity Market Activity Report");
-				postDataOnArchive("eqmkt", toDate,
-						"Equity Market Activity Report");
-				File downloadedFile=download_file("eqmkt", toDate,
-						".csv");
+				String outputDir=System.getProperty("user.dir")+"/temp/";		//SET THE DESTINATION OF OUTPUT FILE
+				String fileNameWithExtension="eqmkt_"+date+".csv";
+				HashMap<String,String> requestPropertyMap= prepareRequestPropertyMap();
+				String generateURL=String.format(getBaseURLs().getPrimaryLink().appendEndURL(getLinks().getEquityMARLink()),CommonFunctions.getStringToDate(date, CommonFunctions.DDMMYYYYhifenFormat));
+				downloadFile(generateURL, outputDir, fileNameWithExtension, requestPropertyMap);
+				logger.sendMessageToDisplay("Equity Market Activity Report");
 				logger.log("Completed Equity MAR download");
-				FileUtil.copyFileBinary(downloadedFile.getAbsolutePath(), settings.getDirectory()+"/EQ_MAR_" + generateDate(toDate) + ".csv");
+				FileUtil.copyFileBinary(outputDir+"/"+fileNameWithExtension, settings.getDirectory()+"/EQ_MAR_" + generateDate(date) + ".csv");
 			} catch (Exception e) {
-				logger
-						.sendMessageToDisplay("Fatal error processing/copying/downloading file");
+				logger.log(e, "Fatal error processing/copying/downloading file", true);
 			}
 		}
 	}

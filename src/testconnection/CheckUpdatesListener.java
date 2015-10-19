@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2011,2012,2013 Rohit Jhunjhunwala
+Copyright (c) 2011,2012,2013,2014 Rohit Jhunjhunwala
 
 The program is distributed under the terms of the GNU General Public License
 
@@ -21,7 +21,7 @@ along with NSE EOD Data Downloader.  If not, see <http://www.gnu.org/licenses/>.
 package testconnection;
 
 import dto.CheckUpdatesDTO;
-
+//For basic callback
 public interface CheckUpdatesListener {
 
 	

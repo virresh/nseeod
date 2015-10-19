@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2011,2012,2013 Rohit Jhunjhunwala
+Copyright (c) 2011,2012,2013,2014 Rohit Jhunjhunwala
 
 The program is distributed under the terms of the GNU General Public License
 
@@ -18,26 +18,18 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with NSE EOD Data Downloader.  If not, see <http://www.gnu.org/licenses/>.
  */
-package config.configxml;
+package logging;
 
-import config.ActionXStream;
+import java.sql.Timestamp;
+import java.util.logging.Formatter;
+import java.util.logging.LogRecord;
 
+public class LogFormatter extends Formatter {
 
-public class SettingsFactory {
-
-	private static Settings settings;
-
-	private SettingsFactory() {
-	}
-
-	public static Settings getSettings() {
-		if (settings == null) {
-			settings=new ActionXStream().readConfigFile();
-		}
-		return settings;
-	}
-	
-	public static void updateSettings(Settings settings){
-		SettingsFactory.settings=settings;
+	@Override
+	public String format(LogRecord record) {
+		return String.format("%1$s %2$s \r\n",
+                new Timestamp(record.getMillis()).toString(),
+                record.getMessage());
 	}
 }

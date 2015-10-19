@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2011,2012,2013 Rohit Jhunjhunwala
+Copyright (c) 2011,2012,2013,2014 Rohit Jhunjhunwala
 
 The program is distributed under the terms of the GNU General Public License
 
@@ -20,13 +20,19 @@ along with NSE EOD Data Downloader.  If not, see <http://www.gnu.org/licenses/>.
  */
 package config.configxml.others;
 
+import java.io.File;
+
 import config.configxml.CheckBoxHolder;
 
+//TODO To be removed in later version and replaced with generic class as XStream is no longer used
 public class Others extends CheckBoxHolder {
 
 	private String directory;
 
 	public String getDirectory() {
+		File file = new File(directory);
+		if(!file.exists())
+			file.mkdirs();
 		return directory;
 	}
 

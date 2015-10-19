@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2011,2012,2013 Rohit Jhunjhunwala
+Copyright (c) 2011,2012,2013,2014 Rohit Jhunjhunwala
 
 The program is distributed under the terms of the GNU General Public License
 
@@ -28,11 +28,11 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import logging.logging;
+import logging.Logging;
 
 public class UnzipFiles {
 
-	private static logging logger=logging.getLogger();
+	private static Logging logger=Logging.getLogger();
 	static int nesting_on=0;
 	/*
 	 * This above flag is set to true when this function is called recursively.
@@ -42,7 +42,7 @@ public class UnzipFiles {
 	  convert_fo and convert_eq as the files will not be actual bhavcopy files
 	 */ 
 	 
-	public List<File> unzip_files(File tempZip) throws Exception{
+	public List<File> unzipFiles(File tempZip) throws Exception{
 		List<File> extractedFiles=new ArrayList<File>();
 		try{
 		logger.log("Deflating zip");
@@ -89,22 +89,6 @@ public class UnzipFiles {
 					unzipFiles(temp,extractedFiles);
 					nesting_on--; // decreases the count when comes out of the recursssion
 				}
-//				if(tempZip.getName().substring(0, 7).equalsIgnoreCase("cmprzip"))
-//					continue;
-//				else
-//				{
-//					if(nesting_on==0)  // if the function is not in recursive mode
-//					{
-//						if(fileName.substring(0, 2).equals("fo"))
-//						{
-//							new Convert_FO().convert_fo(System.getProperty("user.dir")+"/temp/"+fileName);
-//					    }
-//						if(fileName.substring(0, 2).equals("cm"))
-//						{
-//							new Convert_EQ().convert_eq(System.getProperty("user.dir")+"/temp/"+fileName);
-//						}
-//					}
-//				}
 			}
 		}
 		finally{

@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2011,2012,2013 Rohit Jhunjhunwala
+Copyright (c) 2011,2012,2013,2014 Rohit Jhunjhunwala
 
 The program is distributed under the terms of the GNU General Public License
 
@@ -23,6 +23,6 @@ package commonfunctions;
 
 public class Constants {
 	
-	public static final String versionNumber="2.2";
+	public static final String versionNumber="3.0";
 
 }

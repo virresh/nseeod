@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2011,2012,2013 Rohit Jhunjhunwala
+Copyright (c) 2011,2012,2013,2014 Rohit Jhunjhunwala
 
 The program is distributed under the terms of the GNU General Public License
 
@@ -20,26 +20,25 @@ along with NSE EOD Data Downloader.  If not, see <http://www.gnu.org/licenses/>.
  */
 package downloadfiles;
 
-import static commonfunctions.Common_functions.isChkBoxSelected;
+import static commonfunctions.CommonFunctions.isChkBoxSelected;
 
 import java.io.File;
 import java.io.IOException;
 
-import logging.logging;
+import logging.Logging;
 
 import commonfunctions.FileUtil;
 
-import config.configxml.SettingsFactory;
+import config.configxml.Settings;
 import config.configxml.download.DownloadPanelBase;
 
 public class OptionsFiles extends DownloadFile {
 
-	private logging logger=logging.getLogger();
+	private Logging logger=Logging.getLogger();
 	
 	public void optionsCheckBoxDownload(String toDate) {
 		// -------------------------OPTIONS CHECKBOX START------------
-		DownloadPanelBase settings= SettingsFactory.getSettings().getDownload().getOptions();
-//		if (settings.getjCheckBoxOPbhav().isSelected()) // Options Bhavcopy
+		DownloadPanelBase settings= Settings.getSettings().getDownload().getOptions();
 		if (isChkBoxSelected(settings.getCheckboxes(),"Options Bhavcopy") ) // Options Bhavcopy
 		{
 			String fileDate = toDate.substring(0, 2) + toDate.substring(3, 5)
@@ -57,8 +56,6 @@ public class OptionsFiles extends DownloadFile {
 						+ toDate,true);
 			}
 		}
-//		if (settings.getjCheckBoxOPtop10().isSelected()) // Top 10 Options
-															// contracts
 			if (isChkBoxSelected(settings.getCheckboxes(),"Top 10 Options contracts")) // Top 10 Options
 				// contracts
 		{

@@ -20,29 +20,34 @@ along with NSE EOD Data Downloader.  If not, see <http://www.gnu.org/licenses/>.
  */
 package dto;
 
-public class CheckUpdatesDTO {
-	
-	private boolean successful;
-	private boolean updateAvailable;
-	private String message;
-	
-	public boolean isUpdateAvailable() {
-		return updateAvailable;
-	}
-	public void setUpdateAvailable(boolean updateAvailable) {
-		this.updateAvailable = updateAvailable;
-	}
-	public String getMessage() {
-		return message;
-	}
-	public void setMessage(String message) {
-		this.message = message;
-	}
-	public void setSuccessful(boolean successful) {
-		this.successful = successful;
-	}
-	public boolean isSuccessful() {
-		return successful;
-	}
 
+public class BaseURLs {
+
+	private BaseURL primaryLink;
+	private BaseURL secondaryLink;
+	
+	public BaseURL getPrimaryLink(){
+		return primaryLink;
+	}
+	public void setPrimaryLink(String primaryLink) {
+		this.primaryLink = new BaseURL(primaryLink);
+	}
+	public BaseURL getSecondaryLink() {
+		return secondaryLink;
+	}
+	public void setSecondaryLink(String secondaryLink) {
+		this.secondaryLink =new BaseURL( secondaryLink);
+	}
+	
+	public class BaseURL{
+		private String  link;
+		
+		private BaseURL(String link){
+			this.link = link;
+		}
+		
+		public String appendEndURL(String endLink){
+			return link.concat("/").concat(endLink).toString();
+		}
+	}
 }
