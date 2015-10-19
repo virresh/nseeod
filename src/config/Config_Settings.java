@@ -1,5 +1,5 @@
 /*
-Copyright 2011 Rohit Jhunjhunwala
+Copyright (c) 2011,2012,2013 Rohit Jhunjhunwala
 
 The program is distributed under the terms of the GNU General Public License
 
@@ -17,15 +17,21 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with NSE EOD Data Downloader.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 package config;
 
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.event.KeyEvent;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.io.File;
+import java.util.ArrayList;
+
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -33,14 +39,28 @@ import javax.swing.JSeparator;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.WindowConstants;
-import java.awt.event.KeyEvent;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
-public class Config_Settings extends JFrame {
+import logging.logging;
+import rjswing.RJFileChooser;
+
+import commonfunctions.Common_functions;
+
+import config.configxml.CheckBox;
+import config.configxml.CheckBoxHolder;
+import config.configxml.Settings;
+import config.configxml.SettingsFactory;
+import config.configxml.download.Download;
+import config.configxml.download.DownloadPanelBase;
+import config.configxml.others.Others;
+import exceptionhandler.ExceptionHandler;
+
+public class Config_Settings extends JFrame implements WindowListener{
 
 	private static final long serialVersionUID = 1L;
-	private JPanel jContentPane = null;  //  @jve:decl-index=0:visual-constraint="10,10"
+	private JPanel jContentPane = null; // @jve:decl-index=0:visual-constraint="10,10"
 	private JTabbedPane jTabbedPane = null;
 	private JPanel Download = null;
 	private JTabbedPane jTabbedPane1 = null;
@@ -73,7 +93,6 @@ public class Config_Settings extends JFrame {
 	private JSeparator jSeparatorEquityTop = null;
 	private JLabel jLabel6 = null;
 	private JCheckBox jCheckBoxEQMAR = null;
-	private JCheckBox jCheckBoxEQPBH = null;
 	private JLabel jLabel7 = null;
 	private JPanel jPanel2 = null;
 	private JPanel jPanel3 = null;
@@ -83,9 +102,7 @@ public class Config_Settings extends JFrame {
 	private JCheckBox jCheckBoxEQtop10GL = null;
 	private JSeparator jSeparatorEquityTop1 = null;
 	private JLabel jLabel9 = null;
-	private JCheckBox jCheckBoxFUMAR = null;
 	private JCheckBox jCheckBoxFUtop10Fu = null;
-	private JCheckBox jCheckBoxCFMAR = null;
 	private JSeparator jSeparatorEquityTop11 = null;
 	private JCheckBox jCheckBoxCFbhav = null;
 	private JSeparator jSeparatorEquityTop111 = null;
@@ -96,15 +113,66 @@ public class Config_Settings extends JFrame {
 	private JPanel jPanel5 = null;
 	private JCheckBox jCheckBoxSkipWeekend = null;
 	private JCheckBox jCheckBoxLogging = null;
-	private JFrame callingFrame=null;
+	private JFrame callingFrame = null;
 	private JCheckBox jCheckBoxEqBhav = null;
 	private JCheckBox jCheckBoxFuBhav = null;
 	private JCheckBox jCheckBoxFuPrefix = null;
 	private JCheckBox jCheckBoxAppEqFu = null;
+	private RJFileChooser eodFileChooser = null;
+
+	public RJFileChooser getEodFileChooser() {
+		return eodFileChooser;
+	}
+
+	public void setEodFileChooser(RJFileChooser eodFileChooser) {
+		this.eodFileChooser = eodFileChooser;
+	}
+
+	public RJFileChooser getEquityFileChooser() {
+		return equityFileChooser;
+	}
+
+	public void setEquityFileChooser(RJFileChooser equityFileChooser) {
+		this.equityFileChooser = equityFileChooser;
+	}
+
+	public RJFileChooser getFutureFileChooser() {
+		return futureFileChooser;
+	}
+
+	public void setFutureFileChooser(RJFileChooser futureFileChooser) {
+		this.futureFileChooser = futureFileChooser;
+	}
+
+	public RJFileChooser getCurrFuturesfileChooser() {
+		return currFuturesfileChooser;
+	}
+
+	public void setCurrFuturesfileChooser(RJFileChooser currFuturesfileChooser) {
+		this.currFuturesfileChooser = currFuturesfileChooser;
+	}
+
+	private RJFileChooser equityFileChooser = null;
+	private RJFileChooser futureFileChooser = null;
+	private RJFileChooser currFuturesfileChooser = null;
+
+//	public static Config_Settings getInstance() {
+//		try {
+//			if (configSettings == null) {
+//				configSettings = new Config_Settings();
+//			}
+//			return configSettings;
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//			throw new RuntimeException(e);
+//		}
+//	}
+
 	/**
 	 * This is the default constructor
+	 * @throws Exception 
 	 */
-	public Config_Settings() {
+	public Config_Settings() throws Exception{
 		super();
 		initialize();
 	}
@@ -114,36 +182,28 @@ public class Config_Settings extends JFrame {
 	 * 
 	 * @return void
 	 */
-	private void initialize() {
-		
+	private void initialize() throws Exception {
 		this.setContentPane(getJContentPane());
 		this.setEnabled(true);
 		this.setResizable(false);
 		this.setSize(new Dimension(534, 469));
 		this.setTitle("Settings");
-		this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-		this.setLocation(250,210);
+		this.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
+		this.setLocation(250, 210);
+		addWindowListener(this);
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-			
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InstantiationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (UnsupportedLookAndFeelException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+
+		} catch (Exception e) {
+			ExceptionHandler.showException(e);
 		}
-		if(new File(System.getProperty("user.dir")+"/config.xml").exists())
-			new Actions().readConfigFile(jPanel, jPanel1, jPanel2, jPanel3, jPanel4,jPanel5);
-		else
-			new Actions().writeConfigFile(jTabbedPane);
+		if (new File(System.getProperty("user.dir") + "/config.xml").exists()) {
+			restoreSettings(jTabbedPane);
+		} else {
+			updateSettingsModel(jTabbedPane);
+		}
 	}
+
 	/**
 	 * This method initializes jContentPane
 	 * 
@@ -159,10 +219,11 @@ public class Config_Settings extends JFrame {
 		}
 		return jContentPane;
 	}
+
 	/**
-	 * This method initializes jTabbedPane	
-	 * 	
-	 * @return javax.swing.JTabbedPane	
+	 * This method initializes jTabbedPane
+	 * 
+	 * @return javax.swing.JTabbedPane
 	 */
 	private JTabbedPane getJTabbedPane() {
 		if (jTabbedPane == null) {
@@ -173,10 +234,11 @@ public class Config_Settings extends JFrame {
 		}
 		return jTabbedPane;
 	}
+
 	/**
-	 * This method initializes Download	
-	 * 	
-	 * @return javax.swing.JPanel	
+	 * This method initializes Download
+	 * 
+	 * @return javax.swing.JPanel
 	 */
 	private JPanel getDownload() {
 		if (Download == null) {
@@ -193,10 +255,11 @@ public class Config_Settings extends JFrame {
 		}
 		return Download;
 	}
+
 	/**
-	 * This method initializes jTabbedPane1	
-	 * 	
-	 * @return javax.swing.JTabbedPane	
+	 * This method initializes jTabbedPane1
+	 * 
+	 * @return javax.swing.JTabbedPane
 	 */
 	private JTabbedPane getJTabbedPane1() {
 		if (jTabbedPane1 == null) {
@@ -212,10 +275,11 @@ public class Config_Settings extends JFrame {
 		}
 		return jTabbedPane1;
 	}
+
 	/**
-	 * This method initializes jPanel	
-	 * 	
-	 * @return javax.swing.JPanel	
+	 * This method initializes jPanel
+	 * 
+	 * @return javax.swing.JPanel
 	 */
 	private JPanel getJPanel() {
 		if (jPanel == null) {
@@ -250,9 +314,9 @@ public class Config_Settings extends JFrame {
 	}
 
 	/**
-	 * This method initializes jPanel1	
-	 * 	
-	 * @return javax.swing.JPanel	
+	 * This method initializes jPanel1
+	 * 
+	 * @return javax.swing.JPanel
 	 */
 	private JPanel getJPanel1() {
 		if (jPanel1 == null) {
@@ -266,19 +330,25 @@ public class Config_Settings extends JFrame {
 			jPanel1.add(getJSeparatorEquityTop(), null);
 			jPanel1.add(jLabel6, null);
 			jPanel1.add(getJCheckBoxEQMAR(), null);
-			jPanel1.add(getJCheckBoxEQPBH(), null);
 			jPanel1.add(getJCheckBoxEQNHL(), null);
 			jPanel1.add(getJCheckBoxEQtop25sec(), null);
 			jPanel1.add(getJCheckBoxEQtop10GL(), null);
 			jPanel1.add(getJCheckBoxEqBhav(), null);
+			equityFileChooser = new RJFileChooser();
+//			equityFileChooser.setDefaultDirectory(System
+//					.getProperty("user.dir")
+//					+ System.getProperty("file.separator") + "Equity");
+			equityFileChooser.setTextAreaColumns(30);
+			equityFileChooser.setBounds(28, 220, 348, 33);
+			jPanel1.add(equityFileChooser);
 		}
 		return jPanel1;
 	}
 
 	/**
-	 * This method initializes jCheckBoxNifty	
-	 * 	
-	 * @return javax.swing.JCheckBox	
+	 * This method initializes jCheckBoxNifty
+	 * 
+	 * @return javax.swing.JCheckBox
 	 */
 	private JCheckBox getJCheckBoxNifty() {
 		if (jCheckBoxNifty == null) {
@@ -293,9 +363,9 @@ public class Config_Settings extends JFrame {
 	}
 
 	/**
-	 * This method initializes jCheckBoxNiftyJr	
-	 * 	
-	 * @return javax.swing.JCheckBox	
+	 * This method initializes jCheckBoxNiftyJr
+	 * 
+	 * @return javax.swing.JCheckBox
 	 */
 	private JCheckBox getJCheckBoxNiftyJr() {
 		if (jCheckBoxNiftyJr == null) {
@@ -309,9 +379,9 @@ public class Config_Settings extends JFrame {
 	}
 
 	/**
-	 * This method initializes jCheckBoxDefty	
-	 * 	
-	 * @return javax.swing.JCheckBox	
+	 * This method initializes jCheckBoxDefty
+	 * 
+	 * @return javax.swing.JCheckBox
 	 */
 	private JCheckBox getJCheckBoxDefty() {
 		if (jCheckBoxDefty == null) {
@@ -324,9 +394,9 @@ public class Config_Settings extends JFrame {
 	}
 
 	/**
-	 * This method initializes jCheckBoxCNX500	
-	 * 	
-	 * @return javax.swing.JCheckBox	
+	 * This method initializes jCheckBoxCNX500
+	 * 
+	 * @return javax.swing.JCheckBox
 	 */
 	private JCheckBox getJCheckBoxCNX500() {
 		if (jCheckBoxCNX500 == null) {
@@ -340,9 +410,9 @@ public class Config_Settings extends JFrame {
 	}
 
 	/**
-	 * This method initializes jCheckBoxCNXMidcap	
-	 * 	
-	 * @return javax.swing.JCheckBox	
+	 * This method initializes jCheckBoxCNXMidcap
+	 * 
+	 * @return javax.swing.JCheckBox
 	 */
 	private JCheckBox getJCheckBoxCNXMidcap() {
 		if (jCheckBoxCNXMidcap == null) {
@@ -356,9 +426,9 @@ public class Config_Settings extends JFrame {
 	}
 
 	/**
-	 * This method initializes jCheckBoxCNXIt	
-	 * 	
-	 * @return javax.swing.JCheckBox	
+	 * This method initializes jCheckBoxCNXIt
+	 * 
+	 * @return javax.swing.JCheckBox
 	 */
 	private JCheckBox getJCheckBoxCNXIt() {
 		if (jCheckBoxCNXIt == null) {
@@ -372,9 +442,9 @@ public class Config_Settings extends JFrame {
 	}
 
 	/**
-	 * This method initializes jCheckBoxBankNifty	
-	 * 	
-	 * @return javax.swing.JCheckBox	
+	 * This method initializes jCheckBoxBankNifty
+	 * 
+	 * @return javax.swing.JCheckBox
 	 */
 	private JCheckBox getJCheckBoxBankNifty() {
 		if (jCheckBoxBankNifty == null) {
@@ -388,9 +458,9 @@ public class Config_Settings extends JFrame {
 	}
 
 	/**
-	 * This method initializes jCheckBoxMidcap50	
-	 * 	
-	 * @return javax.swing.JCheckBox	
+	 * This method initializes jCheckBoxMidcap50
+	 * 
+	 * @return javax.swing.JCheckBox
 	 */
 	private JCheckBox getJCheckBoxMidcap50() {
 		if (jCheckBoxMidcap50 == null) {
@@ -403,9 +473,9 @@ public class Config_Settings extends JFrame {
 	}
 
 	/**
-	 * This method initializes jCheckBoxESGIndiaIdx	
-	 * 	
-	 * @return javax.swing.JCheckBox	
+	 * This method initializes jCheckBoxESGIndiaIdx
+	 * 
+	 * @return javax.swing.JCheckBox
 	 */
 	private JCheckBox getJCheckBoxESGIndiaIdx() {
 		if (jCheckBoxESGIndiaIdx == null) {
@@ -418,9 +488,9 @@ public class Config_Settings extends JFrame {
 	}
 
 	/**
-	 * This method initializes jCheckBoxShariah	
-	 * 	
-	 * @return javax.swing.JCheckBox	
+	 * This method initializes jCheckBoxShariah
+	 * 
+	 * @return javax.swing.JCheckBox
 	 */
 	private JCheckBox getJCheckBoxShariah() {
 		if (jCheckBoxShariah == null) {
@@ -433,9 +503,9 @@ public class Config_Settings extends JFrame {
 	}
 
 	/**
-	 * This method initializes jCheckBoxShariah500	
-	 * 	
-	 * @return javax.swing.JCheckBox	
+	 * This method initializes jCheckBoxShariah500
+	 * 
+	 * @return javax.swing.JCheckBox
 	 */
 	private JCheckBox getJCheckBoxShariah500() {
 		if (jCheckBoxShariah500 == null) {
@@ -448,9 +518,9 @@ public class Config_Settings extends JFrame {
 	}
 
 	/**
-	 * This method initializes jCheckBoxCNXInfra	
-	 * 	
-	 * @return javax.swing.JCheckBox	
+	 * This method initializes jCheckBoxCNXInfra
+	 * 
+	 * @return javax.swing.JCheckBox
 	 */
 	private JCheckBox getJCheckBoxCNXInfra() {
 		if (jCheckBoxCNXInfra == null) {
@@ -463,9 +533,9 @@ public class Config_Settings extends JFrame {
 	}
 
 	/**
-	 * This method initializes jCheckBoxCNXRealty	
-	 * 	
-	 * @return javax.swing.JCheckBox	
+	 * This method initializes jCheckBoxCNXRealty
+	 * 
+	 * @return javax.swing.JCheckBox
 	 */
 	private JCheckBox getJCheckBoxCNXRealty() {
 		if (jCheckBoxCNXRealty == null) {
@@ -478,9 +548,9 @@ public class Config_Settings extends JFrame {
 	}
 
 	/**
-	 * This method initializes jCheckBoxCNXEnergy	
-	 * 	
-	 * @return javax.swing.JCheckBox	
+	 * This method initializes jCheckBoxCNXEnergy
+	 * 
+	 * @return javax.swing.JCheckBox
 	 */
 	private JCheckBox getJCheckBoxCNXEnergy() {
 		if (jCheckBoxCNXEnergy == null) {
@@ -493,9 +563,9 @@ public class Config_Settings extends JFrame {
 	}
 
 	/**
-	 * This method initializes jCheckBoxCNXMnc	
-	 * 	
-	 * @return javax.swing.JCheckBox	
+	 * This method initializes jCheckBoxCNXMnc
+	 * 
+	 * @return javax.swing.JCheckBox
 	 */
 	private JCheckBox getJCheckBoxCNXMnc() {
 		if (jCheckBoxCNXMnc == null) {
@@ -508,9 +578,9 @@ public class Config_Settings extends JFrame {
 	}
 
 	/**
-	 * This method initializes jCheckBoxCNXPharma	
-	 * 	
-	 * @return javax.swing.JCheckBox	
+	 * This method initializes jCheckBoxCNXPharma
+	 * 
+	 * @return javax.swing.JCheckBox
 	 */
 	private JCheckBox getJCheckBoxCNXPharma() {
 		if (jCheckBoxCNXPharma == null) {
@@ -523,9 +593,9 @@ public class Config_Settings extends JFrame {
 	}
 
 	/**
-	 * This method initializes jCheckBoxCNXPse	
-	 * 	
-	 * @return javax.swing.JCheckBox	
+	 * This method initializes jCheckBoxCNXPse
+	 * 
+	 * @return javax.swing.JCheckBox
 	 */
 	private JCheckBox getJCheckBoxCNXPse() {
 		if (jCheckBoxCNXPse == null) {
@@ -538,9 +608,9 @@ public class Config_Settings extends JFrame {
 	}
 
 	/**
-	 * This method initializes jCheckBoxCNXPsuBank	
-	 * 	
-	 * @return javax.swing.JCheckBox	
+	 * This method initializes jCheckBoxCNXPsuBank
+	 * 
+	 * @return javax.swing.JCheckBox
 	 */
 	private JCheckBox getJCheckBoxCNXPsuBank() {
 		if (jCheckBoxCNXPsuBank == null) {
@@ -553,9 +623,9 @@ public class Config_Settings extends JFrame {
 	}
 
 	/**
-	 * This method initializes jCheckBoxCNXService	
-	 * 	
-	 * @return javax.swing.JCheckBox	
+	 * This method initializes jCheckBoxCNXService
+	 * 
+	 * @return javax.swing.JCheckBox
 	 */
 	private JCheckBox getJCheckBoxCNXService() {
 		if (jCheckBoxCNXService == null) {
@@ -568,9 +638,9 @@ public class Config_Settings extends JFrame {
 	}
 
 	/**
-	 * This method initializes jCheckBoxCNXFmcg	
-	 * 	
-	 * @return javax.swing.JCheckBox	
+	 * This method initializes jCheckBoxCNXFmcg
+	 * 
+	 * @return javax.swing.JCheckBox
 	 */
 	private JCheckBox getJCheckBoxCNXFmcg() {
 		if (jCheckBoxCNXFmcg == null) {
@@ -583,9 +653,9 @@ public class Config_Settings extends JFrame {
 	}
 
 	/**
-	 * This method initializes jCheckBoxCNX100	
-	 * 	
-	 * @return javax.swing.JCheckBox	
+	 * This method initializes jCheckBoxCNX100
+	 * 
+	 * @return javax.swing.JCheckBox
 	 */
 	private JCheckBox getJCheckBoxCNX100() {
 		if (jCheckBoxCNX100 == null) {
@@ -598,9 +668,9 @@ public class Config_Settings extends JFrame {
 	}
 
 	/**
-	 * This method initializes jButtonIdxCheckAll	
-	 * 	
-	 * @return javax.swing.JButton	
+	 * This method initializes jButtonIdxCheckAll
+	 * 
+	 * @return javax.swing.JButton
 	 */
 	private JButton getJButtonIdxCheckAll() {
 		if (jButtonIdxCheckAll == null) {
@@ -608,20 +678,20 @@ public class Config_Settings extends JFrame {
 			jButtonIdxCheckAll.setBounds(new Rectangle(17, 231, 104, 25));
 			jButtonIdxCheckAll.setMnemonic(KeyEvent.VK_UNDEFINED);
 			jButtonIdxCheckAll.setText("Check All");
-			jButtonIdxCheckAll.addActionListener(new java.awt.event.ActionListener() {
-				public void actionPerformed(java.awt.event.ActionEvent e) {
-					// TODO Auto-generated Event stub actionPerformed()
-					checkAllButtonAction();
-				}
-			});
+			jButtonIdxCheckAll
+					.addActionListener(new java.awt.event.ActionListener() {
+						public void actionPerformed(java.awt.event.ActionEvent e) {
+							checkAllButtonAction();
+						}
+					});
 		}
 		return jButtonIdxCheckAll;
 	}
 
 	/**
-	 * This method initializes jSeparator	
-	 * 	
-	 * @return javax.swing.JSeparator	
+	 * This method initializes jSeparator
+	 * 
+	 * @return javax.swing.JSeparator
 	 */
 	private JSeparator getJSeparator() {
 		if (jSeparator == null) {
@@ -632,9 +702,9 @@ public class Config_Settings extends JFrame {
 	}
 
 	/**
-	 * This method initializes jSeparatorEquityRight	
-	 * 	
-	 * @return javax.swing.JSeparator	
+	 * This method initializes jSeparatorEquityRight
+	 * 
+	 * @return javax.swing.JSeparator
 	 */
 	private JSeparator getJSeparatorEquityRight() {
 		if (jSeparatorEquityRight == null) {
@@ -646,9 +716,9 @@ public class Config_Settings extends JFrame {
 	}
 
 	/**
-	 * This method initializes jSeparatorEquityTop	
-	 * 	
-	 * @return javax.swing.JSeparator	
+	 * This method initializes jSeparatorEquityTop
+	 * 
+	 * @return javax.swing.JSeparator
 	 */
 	private JSeparator getJSeparatorEquityTop() {
 		if (jSeparatorEquityTop == null) {
@@ -659,9 +729,9 @@ public class Config_Settings extends JFrame {
 	}
 
 	/**
-	 * This method initializes jCheckBoxEQMAR	
-	 * 	
-	 * @return javax.swing.JCheckBox	
+	 * This method initializes jCheckBoxEQMAR
+	 * 
+	 * @return javax.swing.JCheckBox
 	 */
 	private JCheckBox getJCheckBoxEQMAR() {
 		if (jCheckBoxEQMAR == null) {
@@ -673,23 +743,9 @@ public class Config_Settings extends JFrame {
 	}
 
 	/**
-	 * This method initializes jCheckBoxEQPBH	
-	 * 	
-	 * @return javax.swing.JCheckBox	
-	 */
-	private JCheckBox getJCheckBoxEQPBH() {
-		if (jCheckBoxEQPBH == null) {
-			jCheckBoxEQPBH = new JCheckBox();
-			jCheckBoxEQPBH.setBounds(new Rectangle(28, 72, 183, 21));
-			jCheckBoxEQPBH.setText("Price Bands Hit");
-		}
-		return jCheckBoxEQPBH;
-	}
-
-	/**
-	 * This method initializes jPanel2	
-	 * 	
-	 * @return javax.swing.JPanel	
+	 * This method initializes jPanel2
+	 * 
+	 * @return javax.swing.JPanel
 	 */
 	private JPanel getJPanel2() {
 		if (jPanel2 == null) {
@@ -701,18 +757,24 @@ public class Config_Settings extends JFrame {
 			jPanel2.setName("futures");
 			jPanel2.add(getJSeparatorEquityTop1(), null);
 			jPanel2.add(jLabel9, null);
-			jPanel2.add(getJCheckBoxFUMAR(), null);
 			jPanel2.add(getJCheckBoxFUtop10Fu(), null);
 			jPanel2.add(getJCheckBoxFuBhav(), null);
 			jPanel2.add(getJCheckBoxFuPrefix(), null);
+			futureFileChooser = new RJFileChooser();
+//			futureFileChooser.setDefaultDirectory(System
+//					.getProperty("user.dir")
+//					+ System.getProperty("file.separator") + "Futures");
+			futureFileChooser.setTextAreaColumns(30);
+			futureFileChooser.setBounds(10, 160, 348, 33);
+			jPanel2.add(futureFileChooser);
 		}
 		return jPanel2;
 	}
 
 	/**
-	 * This method initializes jPanel3	
-	 * 	
-	 * @return javax.swing.JPanel	
+	 * This method initializes jPanel3
+	 * 
+	 * @return javax.swing.JPanel
 	 */
 	private JPanel getJPanel3() {
 		if (jPanel3 == null) {
@@ -721,19 +783,26 @@ public class Config_Settings extends JFrame {
 			jLabel13.setText("Currency Futures");
 			jPanel3 = new JPanel();
 			jPanel3.setLayout(null);
-			jPanel3.setName("currency_futures");
-			jPanel3.add(getJCheckBoxCFMAR(), null);
+			jPanel3.setName("currencyfutures");
 			jPanel3.add(getJSeparatorEquityTop11(), null);
 			jPanel3.add(getJCheckBoxCFbhav(), null);
 			jPanel3.add(jLabel13, null);
+			currFuturesfileChooser = new RJFileChooser();
+//			currFuturesfileChooser
+//					.setDefaultDirectory(System.getProperty("user.dir")
+//							+ System.getProperty("file.separator")
+//							+ "Currency Futures");
+			currFuturesfileChooser.setTextAreaColumns(30);
+			currFuturesfileChooser.setBounds(13, 106, 348, 33);
+			jPanel3.add(currFuturesfileChooser);
 		}
 		return jPanel3;
 	}
 
 	/**
-	 * This method initializes jPanel4	
-	 * 	
-	 * @return javax.swing.JPanel	
+	 * This method initializes jPanel4
+	 * 
+	 * @return javax.swing.JPanel
 	 */
 	private JPanel getJPanel4() {
 		if (jPanel4 == null) {
@@ -747,56 +816,62 @@ public class Config_Settings extends JFrame {
 			jPanel4.add(jLabel14, null);
 			jPanel4.add(getJCheckBoxOPbhav(), null);
 			jPanel4.add(getJCheckBoxOPtop10(), null);
+			RJFileChooser fileChooser = new RJFileChooser();
+//			fileChooser.setDefaultDirectory(System.getProperty("user.dir")
+//					+ System.getProperty("file.separator") + "Options");
+			fileChooser.setTextAreaColumns(30);
+			fileChooser.setBounds(16, 100, 348, 33);
+			jPanel4.add(fileChooser);
 		}
 		return jPanel4;
 	}
 
 	/**
-	 * This method initializes jCheckBoxEQNHL	
-	 * 	
-	 * @return javax.swing.JCheckBox	
+	 * This method initializes jCheckBoxEQNHL
+	 * 
+	 * @return javax.swing.JCheckBox
 	 */
 	private JCheckBox getJCheckBoxEQNHL() {
 		if (jCheckBoxEQNHL == null) {
 			jCheckBoxEQNHL = new JCheckBox();
-			jCheckBoxEQNHL.setBounds(new Rectangle(28, 103, 195, 21));
+			jCheckBoxEQNHL.setBounds(new Rectangle(28, 67, 195, 21));
 			jCheckBoxEQNHL.setText("New High or Low");
 		}
 		return jCheckBoxEQNHL;
 	}
 
 	/**
-	 * This method initializes jCheckBoxEQtop25sec	
-	 * 	
-	 * @return javax.swing.JCheckBox	
+	 * This method initializes jCheckBoxEQtop25sec
+	 * 
+	 * @return javax.swing.JCheckBox
 	 */
 	private JCheckBox getJCheckBoxEQtop25sec() {
 		if (jCheckBoxEQtop25sec == null) {
 			jCheckBoxEQtop25sec = new JCheckBox();
-			jCheckBoxEQtop25sec.setBounds(new Rectangle(28, 132, 228, 21));
+			jCheckBoxEQtop25sec.setBounds(new Rectangle(28, 96, 228, 21));
 			jCheckBoxEQtop25sec.setText("Top 25 securities by Trading Values");
 		}
 		return jCheckBoxEQtop25sec;
 	}
 
 	/**
-	 * This method initializes jCheckBoxEQtop10GL	
-	 * 	
-	 * @return javax.swing.JCheckBox	
+	 * This method initializes jCheckBoxEQtop10GL
+	 * 
+	 * @return javax.swing.JCheckBox
 	 */
 	private JCheckBox getJCheckBoxEQtop10GL() {
 		if (jCheckBoxEQtop10GL == null) {
 			jCheckBoxEQtop10GL = new JCheckBox();
-			jCheckBoxEQtop10GL.setBounds(new Rectangle(28, 162, 183, 21));
+			jCheckBoxEQtop10GL.setBounds(new Rectangle(28, 126, 183, 21));
 			jCheckBoxEQtop10GL.setText("Top 10 Gainers & Loosers");
 		}
 		return jCheckBoxEQtop10GL;
 	}
 
 	/**
-	 * This method initializes jSeparatorEquityTop1	
-	 * 	
-	 * @return javax.swing.JSeparator	
+	 * This method initializes jSeparatorEquityTop1
+	 * 
+	 * @return javax.swing.JSeparator
 	 */
 	private JSeparator getJSeparatorEquityTop1() {
 		if (jSeparatorEquityTop1 == null) {
@@ -807,51 +882,23 @@ public class Config_Settings extends JFrame {
 	}
 
 	/**
-	 * This method initializes jCheckBoxFUMAR	
-	 * 	
-	 * @return javax.swing.JCheckBox	
-	 */
-	private JCheckBox getJCheckBoxFUMAR() {
-		if (jCheckBoxFUMAR == null) {
-			jCheckBoxFUMAR = new JCheckBox();
-			jCheckBoxFUMAR.setBounds(new Rectangle(14, 43, 167, 21));
-			jCheckBoxFUMAR.setText("Market Activity Report");
-		}
-		return jCheckBoxFUMAR;
-	}
-
-	/**
-	 * This method initializes jCheckBoxFUtop10Fu	
-	 * 	
-	 * @return javax.swing.JCheckBox	
+	 * This method initializes jCheckBoxFUtop10Fu
+	 * 
+	 * @return javax.swing.JCheckBox
 	 */
 	private JCheckBox getJCheckBoxFUtop10Fu() {
 		if (jCheckBoxFUtop10Fu == null) {
 			jCheckBoxFUtop10Fu = new JCheckBox();
-			jCheckBoxFUtop10Fu.setBounds(new Rectangle(13, 73, 167, 21));
+			jCheckBoxFUtop10Fu.setBounds(new Rectangle(9, 48, 167, 21));
 			jCheckBoxFUtop10Fu.setText("Top 10 future contracts");
 		}
 		return jCheckBoxFUtop10Fu;
 	}
 
 	/**
-	 * This method initializes jCheckBoxCFMAR	
-	 * 	
-	 * @return javax.swing.JCheckBox	
-	 */
-	private JCheckBox getJCheckBoxCFMAR() {
-		if (jCheckBoxCFMAR == null) {
-			jCheckBoxCFMAR = new JCheckBox();
-			jCheckBoxCFMAR.setBounds(new Rectangle(13, 42, 182, 21));
-			jCheckBoxCFMAR.setText("Market Activity Report");
-		}
-		return jCheckBoxCFMAR;
-	}
-
-	/**
-	 * This method initializes jSeparatorEquityTop11	
-	 * 	
-	 * @return javax.swing.JSeparator	
+	 * This method initializes jSeparatorEquityTop11
+	 * 
+	 * @return javax.swing.JSeparator
 	 */
 	private JSeparator getJSeparatorEquityTop11() {
 		if (jSeparatorEquityTop11 == null) {
@@ -862,23 +909,23 @@ public class Config_Settings extends JFrame {
 	}
 
 	/**
-	 * This method initializes jCheckBoxCFbhav	
-	 * 	
-	 * @return javax.swing.JCheckBox	
+	 * This method initializes jCheckBoxCFbhav
+	 * 
+	 * @return javax.swing.JCheckBox
 	 */
 	private JCheckBox getJCheckBoxCFbhav() {
 		if (jCheckBoxCFbhav == null) {
 			jCheckBoxCFbhav = new JCheckBox();
-			jCheckBoxCFbhav.setBounds(new Rectangle(13, 72, 182, 21));
+			jCheckBoxCFbhav.setBounds(new Rectangle(9, 47, 182, 21));
 			jCheckBoxCFbhav.setText("Currency Futures Bhavcopy");
 		}
 		return jCheckBoxCFbhav;
 	}
 
 	/**
-	 * This method initializes jSeparatorEquityTop111	
-	 * 	
-	 * @return javax.swing.JSeparator	
+	 * This method initializes jSeparatorEquityTop111
+	 * 
+	 * @return javax.swing.JSeparator
 	 */
 	private JSeparator getJSeparatorEquityTop111() {
 		if (jSeparatorEquityTop111 == null) {
@@ -889,9 +936,9 @@ public class Config_Settings extends JFrame {
 	}
 
 	/**
-	 * This method initializes jCheckBoxOPbhav	
-	 * 	
-	 * @return javax.swing.JCheckBox	
+	 * This method initializes jCheckBoxOPbhav
+	 * 
+	 * @return javax.swing.JCheckBox
 	 */
 	private JCheckBox getJCheckBoxOPbhav() {
 		if (jCheckBoxOPbhav == null) {
@@ -903,9 +950,9 @@ public class Config_Settings extends JFrame {
 	}
 
 	/**
-	 * This method initializes jCheckBoxOPtop10	
-	 * 	
-	 * @return javax.swing.JCheckBox	
+	 * This method initializes jCheckBoxOPtop10
+	 * 
+	 * @return javax.swing.JCheckBox
 	 */
 	private JCheckBox getJCheckBoxOPtop10() {
 		if (jCheckBoxOPtop10 == null) {
@@ -917,9 +964,9 @@ public class Config_Settings extends JFrame {
 	}
 
 	/**
-	 * This method initializes jPanel5	
-	 * 	
-	 * @return javax.swing.JPanel	
+	 * This method initializes jPanel5
+	 * 
+	 * @return javax.swing.JPanel
 	 */
 	private JPanel getJPanel5() {
 		if (jPanel5 == null) {
@@ -929,343 +976,603 @@ public class Config_Settings extends JFrame {
 			jPanel5.add(getJCheckBoxSkipWeekend(), null);
 			jPanel5.add(getJCheckBoxLogging(), null);
 			jPanel5.add(getJCheckBoxAppEqFu(), null);
+			eodFileChooser = new RJFileChooser();
+//			eodFileChooser.setDefaultDirectory(System.getProperty("user.dir")
+//					+ System.getProperty("file.separator") + "Eod");
+			eodFileChooser.setTextAreaColumns(30);
+			eodFileChooser.setBounds(198, 75, 318, 33);
+			jPanel5.add(eodFileChooser);
 		}
 		return jPanel5;
 	}
 
-/**
- * This method initializes jCheckBoxSkipWeekend	
- * 	
- * @return javax.swing.JCheckBox	
- */
-private JCheckBox getJCheckBoxSkipWeekend() {
-	if (jCheckBoxSkipWeekend == null) {
-		jCheckBoxSkipWeekend = new JCheckBox();
-		jCheckBoxSkipWeekend.setBounds(new Rectangle(12, 27, 136, 21));
-		jCheckBoxSkipWeekend.setText("Skip Weekends");
+	/**
+	 * This method initializes jCheckBoxSkipWeekend
+	 * 
+	 * @return javax.swing.JCheckBox
+	 */
+	private JCheckBox getJCheckBoxSkipWeekend() {
+		if (jCheckBoxSkipWeekend == null) {
+			jCheckBoxSkipWeekend = new JCheckBox();
+			jCheckBoxSkipWeekend.setBounds(new Rectangle(12, 27, 136, 21));
+			jCheckBoxSkipWeekend.setText("Skip Weekends");
+		}
+		return jCheckBoxSkipWeekend;
 	}
-	return jCheckBoxSkipWeekend;
-}
 
-/**
- * This method initializes jCheckBoxLogging	
- * 	
- * @return javax.swing.JCheckBox	
- */
-private JCheckBox getJCheckBoxLogging() {
-	if (jCheckBoxLogging == null) {
-		jCheckBoxLogging = new JCheckBox();
-		jCheckBoxLogging.setBounds(new Rectangle(12, 57, 124, 21));
-		jCheckBoxLogging.setText("Enable Logging");
+	/**
+	 * This method initializes jCheckBoxLogging
+	 * 
+	 * @return javax.swing.JCheckBox
+	 */
+	private JCheckBox getJCheckBoxLogging() {
+		if (jCheckBoxLogging == null) {
+			jCheckBoxLogging = new JCheckBox();
+			jCheckBoxLogging.setBounds(new Rectangle(12, 57, 124, 21));
+			jCheckBoxLogging.setText("Enable Logging");
+		}
+		return jCheckBoxLogging;
 	}
-	return jCheckBoxLogging;
-}
 
-/**
- * This method initializes jCheckBoxEqBhav	
- * 	
- * @return javax.swing.JCheckBox	
- */
-private JCheckBox getJCheckBoxEqBhav() {
-	if (jCheckBoxEqBhav == null) {
-		jCheckBoxEqBhav = new JCheckBox();
-		jCheckBoxEqBhav.setBounds(new Rectangle(28, 192, 230, 21));
-		jCheckBoxEqBhav.setSelected(true);
-		jCheckBoxEqBhav.setText("Equity Bhavcopy");
+	/**
+	 * This method initializes jCheckBoxEqBhav
+	 * 
+	 * @return javax.swing.JCheckBox
+	 */
+	private JCheckBox getJCheckBoxEqBhav() {
+		if (jCheckBoxEqBhav == null) {
+			jCheckBoxEqBhav = new JCheckBox();
+			jCheckBoxEqBhav.setBounds(new Rectangle(28, 156, 230, 21));
+			jCheckBoxEqBhav.setSelected(true);
+			jCheckBoxEqBhav.setText("Equity Bhavcopy");
+		}
+		return jCheckBoxEqBhav;
 	}
-	return jCheckBoxEqBhav;
-}
 
-/**
- * This method initializes jCheckBoxFuBhav	
- * 	
- * @return javax.swing.JCheckBox	
- */
-private JCheckBox getJCheckBoxFuBhav() {
-	if (jCheckBoxFuBhav == null) {
-		jCheckBoxFuBhav = new JCheckBox();
-		jCheckBoxFuBhav.setBounds(new Rectangle(13, 103, 190, 21));
-		jCheckBoxFuBhav.setSelected(true);
-		jCheckBoxFuBhav.setText("Futures Bhavcopy");
+	/**
+	 * This method initializes jCheckBoxFuBhav
+	 * 
+	 * @return javax.swing.JCheckBox
+	 */
+	private JCheckBox getJCheckBoxFuBhav() {
+		if (jCheckBoxFuBhav == null) {
+			jCheckBoxFuBhav = new JCheckBox();
+			jCheckBoxFuBhav.setBounds(new Rectangle(9, 78, 190, 21));
+			jCheckBoxFuBhav.setSelected(true);
+			jCheckBoxFuBhav.setText("Futures Bhavcopy");
+		}
+		return jCheckBoxFuBhav;
 	}
-	return jCheckBoxFuBhav;
-}
-public JCheckBox getjCheckBoxBankNifty() {
-return jCheckBoxBankNifty;
-}
-public JCheckBox getjCheckBoxCFbhav() {
-return jCheckBoxCFbhav;
-}
-public JCheckBox getjCheckBoxCFMAR() {
-return jCheckBoxCFMAR;
-}
-public JCheckBox getjCheckBoxCNX100() {
-return jCheckBoxCNX100;
-}
-public JCheckBox getjCheckBoxCNX500() {
-return jCheckBoxCNX500;
-}
-public JCheckBox getjCheckBoxCNXEnergy() {
-return jCheckBoxCNXEnergy;
-}
-public JCheckBox getjCheckBoxCNXFmcg() {
-return jCheckBoxCNXFmcg;
-}
-public JCheckBox getjCheckBoxCNXInfra() {
-return jCheckBoxCNXInfra;
-}
-public JCheckBox getjCheckBoxCNXIt() {
-return jCheckBoxCNXIt;
-}
-public JCheckBox getjCheckBoxCNXMidcap() {
-return jCheckBoxCNXMidcap;
-}
-public JCheckBox getjCheckBoxCNXMnc() {
-return jCheckBoxCNXMnc;
-}
-public JCheckBox getjCheckBoxCNXPharma() {
-return jCheckBoxCNXPharma;
-}
-public JCheckBox getjCheckBoxCNXPse() {
-return jCheckBoxCNXPse;
-}
-public JCheckBox getjCheckBoxCNXPsuBank() {
-return jCheckBoxCNXPsuBank;
-}
-public JCheckBox getjCheckBoxCNXRealty() {
-return jCheckBoxCNXRealty;
-}
-public JCheckBox getjCheckBoxCNXService() {
-return jCheckBoxCNXService;
-}
-public JCheckBox getjCheckBoxDefty() {
-return jCheckBoxDefty;
-}
-public JCheckBox getjCheckBoxEQMAR() {
-return jCheckBoxEQMAR;
-}
-public JCheckBox getjCheckBoxEQNHL() {
-return jCheckBoxEQNHL;
-}
-public JCheckBox getjCheckBoxEQPBH() {
-return jCheckBoxEQPBH;
-}
-public JCheckBox getjCheckBoxEQtop10GL() {
-return jCheckBoxEQtop10GL;
-}
-public JCheckBox getjCheckBoxEQtop25sec() {
-return jCheckBoxEQtop25sec;
-}
-public JCheckBox getjCheckBoxESGIndiaIdx() {
-return jCheckBoxESGIndiaIdx;
-}
-public JCheckBox getjCheckBoxFUMAR() {
-return jCheckBoxFUMAR;
-}
-public JCheckBox getjCheckBoxFUtop10Fu() {
-return jCheckBoxFUtop10Fu;
-}
-public JCheckBox getjCheckBoxMidcap50() {
-return jCheckBoxMidcap50;
-}
-public JCheckBox getjCheckBoxNifty() {
-return jCheckBoxNifty;
-}
-public JCheckBox getjCheckBoxNiftyJr() {
-return jCheckBoxNiftyJr;
-}
-public JCheckBox getjCheckBoxOPbhav() {
-return jCheckBoxOPbhav;
-}
-public JCheckBox getjCheckBoxOPtop10() {
-return jCheckBoxOPtop10;
-}
-public JCheckBox getjCheckBoxShariah() {
-return jCheckBoxShariah;
-}
-public JCheckBox getjCheckBoxShariah500() {
-return jCheckBoxShariah500;
-}
-public JCheckBox getjCheckBoxSkipWeekend() {
-	return jCheckBoxSkipWeekend;
-}
-public JCheckBox getjCheckBoxLogging() {
-	return jCheckBoxLogging;
-}
-public JPanel getjPanel() {
-	return jPanel;
-}
-public JCheckBox getjCheckBoxEqBhav() {
-	return jCheckBoxEqBhav;
-}
-public JCheckBox getjCheckBoxFuBhav() {
-	return jCheckBoxFuBhav;
-}
-public JCheckBox getjCheckBoxFuPrefix() {
-	return jCheckBoxFuPrefix;
-}
-public JCheckBox getjCheckBoxAppEqFu() {
-	return jCheckBoxAppEqFu;
-}
-public void setjCheckBoxAppEqFu(JCheckBox jCheckBoxAppEqFu) {
-	this.jCheckBoxAppEqFu = jCheckBoxAppEqFu;
-}
-public void setjCheckBoxFuPrefix(JCheckBox jCheckBoxFuPrefix) {
-	this.jCheckBoxFuPrefix = jCheckBoxFuPrefix;
-}
-public void setjCheckBoxBankNifty(JCheckBox jCheckBoxBankNifty) {
-this.jCheckBoxBankNifty = jCheckBoxBankNifty;
-}
-public void setjCheckBoxCFbhav(JCheckBox jCheckBoxCFbhav) {
-this.jCheckBoxCFbhav = jCheckBoxCFbhav;
-}
-public void setjCheckBoxCFMAR(JCheckBox jCheckBoxCFMAR) {
-this.jCheckBoxCFMAR = jCheckBoxCFMAR;
-}
-public void setjCheckBoxCNX100(JCheckBox jCheckBoxCNX100) {
-this.jCheckBoxCNX100 = jCheckBoxCNX100;
-}
-public void setjCheckBoxCNX500(JCheckBox jCheckBoxCNX500) {
-this.jCheckBoxCNX500 = jCheckBoxCNX500;
-}
-public void setjCheckBoxCNXEnergy(JCheckBox jCheckBoxCNXEnergy) {
-this.jCheckBoxCNXEnergy = jCheckBoxCNXEnergy;
-}
-public void setjCheckBoxCNXFmcg(JCheckBox jCheckBoxCNXFmcg) {
-this.jCheckBoxCNXFmcg = jCheckBoxCNXFmcg;
-}
-public void setjCheckBoxCNXInfra(JCheckBox jCheckBoxCNXInfra) {
-this.jCheckBoxCNXInfra = jCheckBoxCNXInfra;
-}
-public void setjCheckBoxCNXIt(JCheckBox jCheckBoxCNXIt) {
-this.jCheckBoxCNXIt = jCheckBoxCNXIt;
-}
-public void setjCheckBoxCNXMidcap(JCheckBox jCheckBoxCNXMidcap) {
-this.jCheckBoxCNXMidcap = jCheckBoxCNXMidcap;
-}
-public void setjCheckBoxCNXMnc(JCheckBox jCheckBoxCNXMnc) {
-this.jCheckBoxCNXMnc = jCheckBoxCNXMnc;
-}
-public void setjCheckBoxCNXPharma(JCheckBox jCheckBoxCNXPharma) {
-this.jCheckBoxCNXPharma = jCheckBoxCNXPharma;
-}
-public void setjCheckBoxCNXPse(JCheckBox jCheckBoxCNXPse) {
-this.jCheckBoxCNXPse = jCheckBoxCNXPse;
-}
-public void setjCheckBoxCNXPsuBank(JCheckBox jCheckBoxCNXPsuBank) {
-this.jCheckBoxCNXPsuBank = jCheckBoxCNXPsuBank;
-}
-public void setjCheckBoxCNXRealty(JCheckBox jCheckBoxCNXRealty) {
-this.jCheckBoxCNXRealty = jCheckBoxCNXRealty;
-}
-public void setjCheckBoxCNXService(JCheckBox jCheckBoxCNXService) {
-this.jCheckBoxCNXService = jCheckBoxCNXService;
-}
-public void setjCheckBoxDefty(JCheckBox jCheckBoxDefty) {
-this.jCheckBoxDefty = jCheckBoxDefty;
-}
-public void setjCheckBoxEQMAR(JCheckBox jCheckBoxEQMAR) {
-this.jCheckBoxEQMAR = jCheckBoxEQMAR;
-}
-public void setjCheckBoxEQNHL(JCheckBox jCheckBoxEQNHL) {
-this.jCheckBoxEQNHL = jCheckBoxEQNHL;
-}
-public void setjCheckBoxEQPBH(JCheckBox jCheckBoxEQPBH) {
-this.jCheckBoxEQPBH = jCheckBoxEQPBH;
-}
-public void setjCheckBoxEQtop10GL(JCheckBox jCheckBoxEQtop10GL) {
-this.jCheckBoxEQtop10GL = jCheckBoxEQtop10GL;
-}
-public void setjCheckBoxEQtop25sec(JCheckBox jCheckBoxEQtop25sec) {
-this.jCheckBoxEQtop25sec = jCheckBoxEQtop25sec;
-}
-public void setjCheckBoxESGIndiaIdx(JCheckBox jCheckBoxESGIndiaIdx) {
-this.jCheckBoxESGIndiaIdx = jCheckBoxESGIndiaIdx;
-}
-public void setjCheckBoxFUMAR(JCheckBox jCheckBoxFUMAR) {
-this.jCheckBoxFUMAR = jCheckBoxFUMAR;
-}
-public void setjCheckBoxFUtop10Fu(JCheckBox jCheckBoxFUtop10Fu) {
-this.jCheckBoxFUtop10Fu = jCheckBoxFUtop10Fu;
-}
-public void setjCheckBoxMidcap50(JCheckBox jCheckBoxMidcap50) {
-this.jCheckBoxMidcap50 = jCheckBoxMidcap50;
-}
-public void setjCheckBoxNifty(JCheckBox jCheckBoxNifty) {
-this.jCheckBoxNifty = jCheckBoxNifty;
-}
-public void setjCheckBoxNiftyJr(JCheckBox jCheckBoxNiftyJr) {
-this.jCheckBoxNiftyJr = jCheckBoxNiftyJr;
-}
-public void setjCheckBoxOPbhav(JCheckBox jCheckBoxOPbhav) {
-this.jCheckBoxOPbhav = jCheckBoxOPbhav;
-}
-public void setjCheckBoxOPtop10(JCheckBox jCheckBoxOPtop10) {
-this.jCheckBoxOPtop10 = jCheckBoxOPtop10;
-}
-public void setjCheckBoxShariah(JCheckBox jCheckBoxShariah) {
-this.jCheckBoxShariah = jCheckBoxShariah;
-}
-public void setjCheckBoxShariah500(JCheckBox jCheckBoxShariah500) {
-this.jCheckBoxShariah500 = jCheckBoxShariah500;
-}
-public void setjCheckBoxEqBhav(JCheckBox jCheckBoxEqBhav) {
-	this.jCheckBoxEqBhav = jCheckBoxEqBhav;
-}
-public void setjCheckBoxFuBhav(JCheckBox jCheckBoxFuBhav) {
-	this.jCheckBoxFuBhav = jCheckBoxFuBhav;
-}
 
-private void checkAllButtonAction(){
+	public JCheckBox getjCheckBoxBankNifty() {
+		return jCheckBoxBankNifty;
+	}
+
+	public JCheckBox getjCheckBoxCFbhav() {
+		return jCheckBoxCFbhav;
+	}
+
 	
-	for(int i=0;i<jPanel.getComponentCount();i++)
-	{
-		if(jPanel.getComponent(i).getClass().getSimpleName().equalsIgnoreCase("JCheckBox"))
-		{
-			((JCheckBox)jPanel.getComponent(i)).setSelected(true);
+	public JCheckBox getjCheckBoxCNX100() {
+		return jCheckBoxCNX100;
+	}
+
+	public JCheckBox getjCheckBoxCNX500() {
+		return jCheckBoxCNX500;
+	}
+
+	public JCheckBox getjCheckBoxCNXEnergy() {
+		return jCheckBoxCNXEnergy;
+	}
+
+	public JCheckBox getjCheckBoxCNXFmcg() {
+		return jCheckBoxCNXFmcg;
+	}
+
+	public JCheckBox getjCheckBoxCNXInfra() {
+		return jCheckBoxCNXInfra;
+	}
+
+	public JCheckBox getjCheckBoxCNXIt() {
+		return jCheckBoxCNXIt;
+	}
+
+	public JCheckBox getjCheckBoxCNXMidcap() {
+		return jCheckBoxCNXMidcap;
+	}
+
+	public JCheckBox getjCheckBoxCNXMnc() {
+		return jCheckBoxCNXMnc;
+	}
+
+	public JCheckBox getjCheckBoxCNXPharma() {
+		return jCheckBoxCNXPharma;
+	}
+
+	public JCheckBox getjCheckBoxCNXPse() {
+		return jCheckBoxCNXPse;
+	}
+
+	public JCheckBox getjCheckBoxCNXPsuBank() {
+		return jCheckBoxCNXPsuBank;
+	}
+
+	public JCheckBox getjCheckBoxCNXRealty() {
+		return jCheckBoxCNXRealty;
+	}
+
+	public JCheckBox getjCheckBoxCNXService() {
+		return jCheckBoxCNXService;
+	}
+
+	public JCheckBox getjCheckBoxDefty() {
+		return jCheckBoxDefty;
+	}
+
+	public JCheckBox getjCheckBoxEQMAR() {
+		return jCheckBoxEQMAR;
+	}
+
+	public JCheckBox getjCheckBoxEQNHL() {
+		return jCheckBoxEQNHL;
+	}
+
+
+	public JCheckBox getjCheckBoxEQtop10GL() {
+		return jCheckBoxEQtop10GL;
+	}
+
+	public JCheckBox getjCheckBoxEQtop25sec() {
+		return jCheckBoxEQtop25sec;
+	}
+
+	public JCheckBox getjCheckBoxESGIndiaIdx() {
+		return jCheckBoxESGIndiaIdx;
+	}
+
+
+	public JCheckBox getjCheckBoxFUtop10Fu() {
+		return jCheckBoxFUtop10Fu;
+	}
+
+	public JCheckBox getjCheckBoxMidcap50() {
+		return jCheckBoxMidcap50;
+	}
+
+	public JCheckBox getjCheckBoxNifty() {
+		return jCheckBoxNifty;
+	}
+
+	public JCheckBox getjCheckBoxNiftyJr() {
+		return jCheckBoxNiftyJr;
+	}
+
+	public JCheckBox getjCheckBoxOPbhav() {
+		return jCheckBoxOPbhav;
+	}
+
+	public JCheckBox getjCheckBoxOPtop10() {
+		return jCheckBoxOPtop10;
+	}
+
+	public JCheckBox getjCheckBoxShariah() {
+		return jCheckBoxShariah;
+	}
+
+	public JCheckBox getjCheckBoxShariah500() {
+		return jCheckBoxShariah500;
+	}
+
+	public JCheckBox getjCheckBoxSkipWeekend() {
+		return jCheckBoxSkipWeekend;
+	}
+
+	public JCheckBox getjCheckBoxLogging() {
+		return jCheckBoxLogging;
+	}
+
+	public JPanel getjPanel() {
+		return jPanel;
+	}
+
+	public JCheckBox getjCheckBoxEqBhav() {
+		return jCheckBoxEqBhav;
+	}
+
+	public JCheckBox getjCheckBoxFuBhav() {
+		return jCheckBoxFuBhav;
+	}
+
+	public JCheckBox getjCheckBoxFuPrefix() {
+		return jCheckBoxFuPrefix;
+	}
+
+	public JCheckBox getjCheckBoxAppEqFu() {
+		return jCheckBoxAppEqFu;
+	}
+
+	public void setjCheckBoxAppEqFu(JCheckBox jCheckBoxAppEqFu) {
+		this.jCheckBoxAppEqFu = jCheckBoxAppEqFu;
+	}
+
+	public void setjCheckBoxFuPrefix(JCheckBox jCheckBoxFuPrefix) {
+		this.jCheckBoxFuPrefix = jCheckBoxFuPrefix;
+	}
+
+	public void setjCheckBoxBankNifty(JCheckBox jCheckBoxBankNifty) {
+		this.jCheckBoxBankNifty = jCheckBoxBankNifty;
+	}
+
+	public void setjCheckBoxCFbhav(JCheckBox jCheckBoxCFbhav) {
+		this.jCheckBoxCFbhav = jCheckBoxCFbhav;
+	}
+
+
+
+	public void setjCheckBoxCNX100(JCheckBox jCheckBoxCNX100) {
+		this.jCheckBoxCNX100 = jCheckBoxCNX100;
+	}
+
+	public void setjCheckBoxCNX500(JCheckBox jCheckBoxCNX500) {
+		this.jCheckBoxCNX500 = jCheckBoxCNX500;
+	}
+
+	public void setjCheckBoxCNXEnergy(JCheckBox jCheckBoxCNXEnergy) {
+		this.jCheckBoxCNXEnergy = jCheckBoxCNXEnergy;
+	}
+
+	public void setjCheckBoxCNXFmcg(JCheckBox jCheckBoxCNXFmcg) {
+		this.jCheckBoxCNXFmcg = jCheckBoxCNXFmcg;
+	}
+
+	public void setjCheckBoxCNXInfra(JCheckBox jCheckBoxCNXInfra) {
+		this.jCheckBoxCNXInfra = jCheckBoxCNXInfra;
+	}
+
+	public void setjCheckBoxCNXIt(JCheckBox jCheckBoxCNXIt) {
+		this.jCheckBoxCNXIt = jCheckBoxCNXIt;
+	}
+
+	public void setjCheckBoxCNXMidcap(JCheckBox jCheckBoxCNXMidcap) {
+		this.jCheckBoxCNXMidcap = jCheckBoxCNXMidcap;
+	}
+
+	public void setjCheckBoxCNXMnc(JCheckBox jCheckBoxCNXMnc) {
+		this.jCheckBoxCNXMnc = jCheckBoxCNXMnc;
+	}
+
+	public void setjCheckBoxCNXPharma(JCheckBox jCheckBoxCNXPharma) {
+		this.jCheckBoxCNXPharma = jCheckBoxCNXPharma;
+	}
+
+	public void setjCheckBoxCNXPse(JCheckBox jCheckBoxCNXPse) {
+		this.jCheckBoxCNXPse = jCheckBoxCNXPse;
+	}
+
+	public void setjCheckBoxCNXPsuBank(JCheckBox jCheckBoxCNXPsuBank) {
+		this.jCheckBoxCNXPsuBank = jCheckBoxCNXPsuBank;
+	}
+
+	public void setjCheckBoxCNXRealty(JCheckBox jCheckBoxCNXRealty) {
+		this.jCheckBoxCNXRealty = jCheckBoxCNXRealty;
+	}
+
+	public void setjCheckBoxCNXService(JCheckBox jCheckBoxCNXService) {
+		this.jCheckBoxCNXService = jCheckBoxCNXService;
+	}
+
+	public void setjCheckBoxDefty(JCheckBox jCheckBoxDefty) {
+		this.jCheckBoxDefty = jCheckBoxDefty;
+	}
+
+	public void setjCheckBoxEQMAR(JCheckBox jCheckBoxEQMAR) {
+		this.jCheckBoxEQMAR = jCheckBoxEQMAR;
+	}
+
+	public void setjCheckBoxEQNHL(JCheckBox jCheckBoxEQNHL) {
+		this.jCheckBoxEQNHL = jCheckBoxEQNHL;
+	}
+
+	public void setjCheckBoxEQtop10GL(JCheckBox jCheckBoxEQtop10GL) {
+		this.jCheckBoxEQtop10GL = jCheckBoxEQtop10GL;
+	}
+
+	public void setjCheckBoxEQtop25sec(JCheckBox jCheckBoxEQtop25sec) {
+		this.jCheckBoxEQtop25sec = jCheckBoxEQtop25sec;
+	}
+
+	public void setjCheckBoxESGIndiaIdx(JCheckBox jCheckBoxESGIndiaIdx) {
+		this.jCheckBoxESGIndiaIdx = jCheckBoxESGIndiaIdx;
+	}
+
+	public void setjCheckBoxFUtop10Fu(JCheckBox jCheckBoxFUtop10Fu) {
+		this.jCheckBoxFUtop10Fu = jCheckBoxFUtop10Fu;
+	}
+
+	public void setjCheckBoxMidcap50(JCheckBox jCheckBoxMidcap50) {
+		this.jCheckBoxMidcap50 = jCheckBoxMidcap50;
+	}
+
+	public void setjCheckBoxNifty(JCheckBox jCheckBoxNifty) {
+		this.jCheckBoxNifty = jCheckBoxNifty;
+	}
+
+	public void setjCheckBoxNiftyJr(JCheckBox jCheckBoxNiftyJr) {
+		this.jCheckBoxNiftyJr = jCheckBoxNiftyJr;
+	}
+
+	public void setjCheckBoxOPbhav(JCheckBox jCheckBoxOPbhav) {
+		this.jCheckBoxOPbhav = jCheckBoxOPbhav;
+	}
+
+	public void setjCheckBoxOPtop10(JCheckBox jCheckBoxOPtop10) {
+		this.jCheckBoxOPtop10 = jCheckBoxOPtop10;
+	}
+
+	public void setjCheckBoxShariah(JCheckBox jCheckBoxShariah) {
+		this.jCheckBoxShariah = jCheckBoxShariah;
+	}
+
+	public void setjCheckBoxShariah500(JCheckBox jCheckBoxShariah500) {
+		this.jCheckBoxShariah500 = jCheckBoxShariah500;
+	}
+
+	public void setjCheckBoxEqBhav(JCheckBox jCheckBoxEqBhav) {
+		this.jCheckBoxEqBhav = jCheckBoxEqBhav;
+	}
+
+	public void setjCheckBoxFuBhav(JCheckBox jCheckBoxFuBhav) {
+		this.jCheckBoxFuBhav = jCheckBoxFuBhav;
+	}
+
+	private void checkAllButtonAction() {
+
+		for (int i = 0; i < jPanel.getComponentCount(); i++) {
+			if (jPanel.getComponent(i).getClass().getSimpleName()
+					.equalsIgnoreCase("JCheckBox")) {
+				((JCheckBox) jPanel.getComponent(i)).setSelected(true);
+			}
 		}
 	}
-}
 
-public void showConfig_Settings(JFrame callingFrame){
-	this.setVisible(true);
-	this.callingFrame=callingFrame;
-	callingFrame.setEnabled(false);
-}
-public void dispose() {
-	// TODO Auto-generated method stub
-	new Actions().writeConfigFile(jTabbedPane);
-	callingFrame.setEnabled(true);
-	super.dispose();
-}
-
-/**
- * This method initializes jCheckBoxFuPrefix	
- * 	
- * @return javax.swing.JCheckBox	
- */
-private JCheckBox getJCheckBoxFuPrefix() {
-	if (jCheckBoxFuPrefix == null) {
-		jCheckBoxFuPrefix = new JCheckBox();
-		jCheckBoxFuPrefix.setBounds(new Rectangle(13, 132, 197, 21));
-		jCheckBoxFuPrefix.setText("Add (-I) as prefix");
+	public void showConfig_Settings(JFrame callingFrame) {
+		logging.getLogger().log("in show config");
+		this.setVisible(true);
+		this.callingFrame = callingFrame;
+		callingFrame.setEnabled(false);
 	}
-	return jCheckBoxFuPrefix;
-}
 
-/**
- * This method initializes jCheckBoxAppEqFu	
- * 	
- * @return javax.swing.JCheckBox	
- */
-private JCheckBox getJCheckBoxAppEqFu() {
-	if (jCheckBoxAppEqFu == null) {
-		jCheckBoxAppEqFu = new JCheckBox();
-		jCheckBoxAppEqFu.setBounds(new Rectangle(13, 87, 231, 21));
-		jCheckBoxAppEqFu.setSelected(true);
-		jCheckBoxAppEqFu.setText("Create consolidated Bhavcopy");
+	/**
+	 * This method initializes jCheckBoxFuPrefix
+	 * 
+	 * @return javax.swing.JCheckBox
+	 */
+	private JCheckBox getJCheckBoxFuPrefix() {
+		if (jCheckBoxFuPrefix == null) {
+			jCheckBoxFuPrefix = new JCheckBox();
+			jCheckBoxFuPrefix.setBounds(new Rectangle(9, 107, 197, 21));
+			jCheckBoxFuPrefix.setText("Add (-I) as prefix");
+		}
+		return jCheckBoxFuPrefix;
 	}
-	return jCheckBoxAppEqFu;
-}
 
-}  //  @jve:decl-index=0:visual-constraint="44,13"
+	/**
+	 * This method initializes jCheckBoxAppEqFu
+	 * 
+	 * @return javax.swing.JCheckBox
+	 */
+	private JCheckBox getJCheckBoxAppEqFu() {
+		if (jCheckBoxAppEqFu == null) {
+			jCheckBoxAppEqFu = new JCheckBox();
+			jCheckBoxAppEqFu.setBounds(new Rectangle(13, 87, 171, 21));
+			jCheckBoxAppEqFu.setSelected(true);
+			jCheckBoxAppEqFu.setText("Create consolidated Bhavcopy");
+			jCheckBoxAppEqFu.addChangeListener(new ChangeListener() {
+				public void stateChanged(ChangeEvent e) {
+					jCheckBoxAppEqFuStateChanged();
+				}
+			});
+		}
+		return jCheckBoxAppEqFu;
+	}
+
+	private void jCheckBoxAppEqFuStateChanged() {
+		if (jCheckBoxAppEqFu.isSelected())
+			eodFileChooser.setEnabled(true);
+		else
+			eodFileChooser.setEnabled(false);
+	}
+
+	private void restoreSettings(JComponent jTabbedPane) {
+		// Download
+		// Index
+		Settings settings= SettingsFactory.getSettings();
+		JPanel download = (JPanel) Common_functions.getComponentByName(true,
+				jTabbedPane, "download");
+		JPanel index = (JPanel) Common_functions.getComponentByName(true,
+				download, "index");
+		restoreDownloadPanelBaseSettings(settings.getDownload().getIndex(),
+				index);
+		// Equity
+		JPanel equity = (JPanel) Common_functions.getComponentByName(true,
+				download, "equity");
+		restoreDownloadPanelBaseSettings(settings.getDownload().getEquity(),
+				equity);
+		// Futures
+		JPanel futures = (JPanel) Common_functions.getComponentByName(true,
+				download, "futures");
+		restoreDownloadPanelBaseSettings(settings.getDownload().getFutures(),
+				futures);
+		// CurrencyFutures
+		JPanel currencyfutures = (JPanel) Common_functions.getComponentByName(
+				true, download, "currencyfutures");
+		restoreDownloadPanelBaseSettings(settings.getDownload().getCurrencyfutures(),
+				currencyfutures);
+		// Options
+		JPanel options = (JPanel) Common_functions.getComponentByName(true,
+				download, "options");
+		restoreDownloadPanelBaseSettings(settings.getDownload().getOptions(),
+				options);
+
+		// Other options
+		JPanel others = (JPanel) Common_functions.getComponentByName(true,
+				jTabbedPane, "others");
+		restoreOtherSettings(settings.getOthers(), others);
+	}
+
+	private void restoreDownloadPanelBaseSettings(DownloadPanelBase holder,
+			JComponent jComponent) {
+		restoreCheckBoxSettings(holder, jComponent);
+		restoreDirectorySettings(holder.getDirectory(), jComponent);
+	}
+
+	private void restoreOtherSettings(Others holder, JComponent jComponent) {
+		restoreCheckBoxSettings(holder, jComponent);
+		restoreDirectorySettings(holder.getDirectory(), jComponent);
+	}
+
+	private void restoreDirectorySettings(String directory,
+			JComponent jComponent) {
+		for (int i = 0; i < jComponent.getComponentCount(); i++) {
+			if (jComponent.getComponent(i).getClass() == RJFileChooser.class) {
+				RJFileChooser chooser = (RJFileChooser) jComponent
+						.getComponent(i);
+				chooser.setDefaultDirectory(directory);
+			}
+		}
+	}
+
+	private void restoreCheckBoxSettings(CheckBoxHolder holder,
+			JComponent jComponent) {
+		for (int i = 0; i < jComponent.getComponentCount(); i++) {
+			if (jComponent.getComponent(i).getClass() == JCheckBox.class) {
+				JCheckBox checkBox = ((JCheckBox) jComponent.getComponent(i));
+				for (int j = 0; j < holder.getCheckboxes().length; j++) {
+					if (checkBox.getText().equalsIgnoreCase(
+							holder.getCheckboxes()[j].getName())) {
+						checkBox.setSelected(Boolean.valueOf(holder
+								.getCheckboxes()[j].getValue()));
+					}
+				}
+			}
+		}
+	}
+
+	// Aggregates the entire data
+	private Download saveDownloadPanelSettings(JPanel download) {
+		Download downloadData = new Download();
+		JPanel index = (JPanel) Common_functions.getComponentByName(true,
+				download, "index");
+		DownloadPanelBase indexData = saveDownloadPanelData(index);
+		JPanel equity = (JPanel) Common_functions.getComponentByName(true,
+				download, "equity");
+		DownloadPanelBase equityData = saveDownloadPanelData(equity);
+		JPanel futures = (JPanel) Common_functions.getComponentByName(true,
+				download, "futures");
+		DownloadPanelBase futuresData = saveDownloadPanelData(futures);
+		JPanel currencyFutures = (JPanel) Common_functions.getComponentByName(
+				true, download, "currencyfutures");
+		DownloadPanelBase currencyFuturesData = saveDownloadPanelData(currencyFutures);
+		JPanel options = (JPanel) Common_functions.getComponentByName(true,
+				download, "options");
+		DownloadPanelBase optionsData = saveDownloadPanelData(options);
+		downloadData.setIndex(indexData);
+		downloadData.setEquity(equityData);
+		downloadData.setFutures(futuresData);
+		downloadData.setCurrencyfutures(currencyFuturesData);
+		downloadData.setOptions(optionsData);
+		return downloadData;
+	}
+
+	private DownloadPanelBase saveDownloadPanelData(JPanel tab) {
+		DownloadPanelBase panelData = new DownloadPanelBase();
+		panelData.setCheckboxes(saveAllCheckBoxesFromComponent(tab)
+				.getCheckboxes());
+		panelData.setDirectory(saveDirectoryData(tab));
+		return panelData;
+	}
+
+	private String saveDirectoryData(JPanel tab) {
+		for (int i = 0; i < tab.getComponentCount(); i++) {
+			if (tab.getComponent(i).getClass() == RJFileChooser.class) {
+				RJFileChooser dirChooser = (RJFileChooser) tab.getComponent(i);
+				return dirChooser.getSelectedDirectory();
+			}
+		}
+		return null;
+	}
+
+	// Extracts all the check box's settings and store it in the dto
+	private CheckBoxHolder saveAllCheckBoxesFromComponent(
+			JComponent parentComponent) {
+		CheckBoxHolder checkBoxHolder = new CheckBoxHolder();
+		ArrayList<CheckBox> indexChkBoxes = new ArrayList<CheckBox>();
+		for (int i = 0; i < parentComponent.getComponentCount(); i++) {
+			if (parentComponent.getComponent(i).getClass() == JCheckBox.class) {
+				CheckBox chkBox = new CheckBox();
+				chkBox.setName(((JCheckBox) parentComponent.getComponent(i))
+						.getText());
+				chkBox.setValue(Boolean.toString(((JCheckBox) parentComponent
+						.getComponent(i)).isSelected()));
+				indexChkBoxes.add(chkBox);
+			}
+		}
+		CheckBox[] arrChkBox = new CheckBox[indexChkBoxes.size()];
+		indexChkBoxes.toArray(arrChkBox);
+		checkBoxHolder.setCheckboxes(arrChkBox);
+		return checkBoxHolder;
+	}
+
+	private Others saveOtherPanelSettings(JPanel others) {
+		Others otherData = new Others();
+		otherData.setCheckboxes(saveAllCheckBoxesFromComponent(others)
+				.getCheckboxes());
+		otherData.setDirectory(saveDirectoryData(others));
+		return otherData;
+	}
+	
+	private void updateSettingsModel(JComponent jTabbedPane) throws Exception {
+		Settings settings = SettingsFactory.getSettings();
+		JPanel download = (JPanel) Common_functions.getComponentByName(true,
+				jTabbedPane, "download");
+		JPanel others = (JPanel) Common_functions.getComponentByName(true,
+				jTabbedPane, "others");
+		settings.setDownload(saveDownloadPanelSettings(download));
+		settings.setOthers(saveOtherPanelSettings(others));
+		settings.commit();
+	}
+
+	public void windowOpened(WindowEvent e) {
+		
+	}
+
+	public void windowClosing(WindowEvent e){
+		try {
+			updateSettingsModel(jTabbedPane);
+			callingFrame.setEnabled(true);
+		} catch (Exception e1) {
+			throw new RuntimeException(e1);
+		}
+	}
+
+	public void windowClosed(WindowEvent e) {
+		
+		
+	}
+
+	public void windowIconified(WindowEvent e) {
+		
+	}
+
+	public void windowDeiconified(WindowEvent e) {
+		
+	}
+
+	public void windowActivated(WindowEvent e) {
+		
+	}
+
+	public void windowDeactivated(WindowEvent e) {
+		
+	}
+} // @jve:decl-index=0:visual-constraint="44,13"
