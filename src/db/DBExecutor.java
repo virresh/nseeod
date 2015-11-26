@@ -80,6 +80,7 @@ public class DBExecutor {
 		links.setIndexBahvcopyLink(readRelativeLink(ps, "indexbhav"));
 		links.setVersionLink(readRelativeLink(ps, "version"));
 		links.setNewsLink(readRelativeLink(ps, "news"));
+		links.setIndexArchiveLink(readRelativeLink(ps, "indexarchive"));
 		ps.close();
 		}
 		finally{

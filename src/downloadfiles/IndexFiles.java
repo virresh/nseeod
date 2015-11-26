@@ -20,29 +20,39 @@ along with NSE EOD Data Downloader.  If not, see <http://www.gnu.org/licenses/>.
  */
 package downloadfiles;
 
+import java.io.FileNotFoundException;
 import java.util.HashMap;
-
-import commonfunctions.CommonFunctions;
+import java.util.List;
 
 import logging.Logging;
+import commonfunctions.CommonFunctions;
 import convertcsv.ConvertIndices;
+import dto.IndexSymbol;
 
 public class IndexFiles extends DownloadFile {
 
 	private Logging logger=Logging.getLogger();
 	
-	public void downloadIndexData(String[] stockSymbol,String date){
+	public void downloadIndexData(List<IndexSymbol> stockSymbolList,String date){
 		// Added the try catch block which retries if posting data is failed
 		// As per request no 3197092 from thenikxyz
 		logger.log("Starting Index download");
+		IndexSymbol[] stockSymbol = new IndexSymbol[stockSymbolList.size()];
+		stockSymbolList.toArray(stockSymbol);
 		int i = 0;
 		int attempt = 1;
 		while (stockSymbol!=null && i < stockSymbol.length)
 		{
 			try {
-				downloadCSV(stockSymbol[i],
-						date, date);
-			} catch (Exception e) {
+				try{
+					downloadCSV(stockSymbol[i].getPrimaryCode(),
+							date, date);
+				}catch(FileNotFoundException e){
+					logger.log(e, "Trying alternate code", true);
+					downloadCSV(stockSymbol[i].getAlternateCode(),
+							date, date);
+				}
+			}catch (Exception e) {
 				if (attempt == 3) {
 					i++;
 					logger.log(e, "Attemp Failed", true);
@@ -59,6 +69,15 @@ public class IndexFiles extends DownloadFile {
 			attempt = 1;
 		}
 		logger.log("Ending Index download");
+	}
+	
+	private void pollLink(String symbol,String fromDate,String toDate) throws Exception{
+		String link = String.format("%1$s?indexType=%2$s&fromDate=%3$s&toDate=%4$s",getBaseURLs().getPrimaryLink().appendEndURL(getLinks().getIndexArchiveLink()) ,symbol.replace(" ", "%20"), 
+				fromDate,toDate);
+		String outputDir=System.getProperty("user.dir")+"/temp/";		//SET THE DESTINATION OF OUTPUT FILE
+		String fileNameWithExtension="temp_"+fromDate+".csv";
+		HashMap<String,String> requestPropertyMap= prepareRequestPropertyMap();
+		downloadFile(link, outputDir, fileNameWithExtension, requestPropertyMap);
 	}
 
 	private void downloadCSV(String symbol,String fromDate,String toDate)  throws Exception{
@@ -81,7 +100,7 @@ public class IndexFiles extends DownloadFile {
 		try {
 			new ConvertIndices(symbol).convertToDesiredFormat(outputDir+fileNameWithExtension);
 		} catch (Exception e) {
-			logger.log(e,"Could not process the file"+symbol+"_"+fromDate+".csv",true);		
+			logger.log(e,"Could not process the file"+symbol+"_"+fromDate+".csv",true);
 		}
 		//------------------------------------------------------------
 	}

@@ -30,6 +30,15 @@ public class Links {
 	private String indexBahvcopyLink;
 	private String versionLink;
 	private String newsLink;
+	private String indexArchiveLink;
+	
+	public String getIndexArchiveLink() {
+		return indexArchiveLink;
+	}
+	
+	public void setIndexArchiveLink(String indexArchiveLink) {
+		this.indexArchiveLink = indexArchiveLink;
+	}
 	
 	public String getVersionLink() {
 		return versionLink;
