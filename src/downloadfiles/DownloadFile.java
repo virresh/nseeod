@@ -43,8 +43,8 @@ import dto.Links;
 
 public class DownloadFile {
 	
-	private Links links;
-	private BaseURLs baseURLs;
+	protected Links links;
+	protected BaseURLs baseURLs;
 	private Logging logger=Logging.getLogger();
 	
 	public Links getLinks() {

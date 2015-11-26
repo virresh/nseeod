@@ -1,0 +1,7 @@
+/bin/
+/Temp/
+.project
+.classpath
+derby.log
+/nsedb/
+app.log*

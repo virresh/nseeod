@@ -25,17 +25,20 @@ import static commonfunctions.CommonFunctions.isChkBoxSelected;
 import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.GregorianCalendar;
+import java.util.List;
+
+import com.sun.org.apache.xalan.internal.xsltc.compiler.sym;
 
 import logging.Logging;
-
 import commonfunctions.CommonFunctions;
 import commonfunctions.FileUtil;
-
 import config.configxml.CheckBox;
 import config.configxml.Settings;
 import config.configxml.download.DownloadPanelBase;
 import config.configxml.others.Others;
+import dto.IndexSymbol;
 
 public class DownloadFileThread implements Runnable {
 
@@ -93,7 +96,6 @@ public class DownloadFileThread implements Runnable {
 		// Set the verbose logging flag
 		logger.setVerboseLogFlag(isChkBoxSelected(otherBase.getCheckboxes(),
 				LOGGING));
-		String tempSymbol = generateIndexString();
 		String fromDate = jTextFrom;
 		String toDate = jTextTo;
 		GregorianCalendar fromCalendar = new GregorianCalendar();
@@ -188,12 +190,8 @@ public class DownloadFileThread implements Runnable {
 
 			// ----------------------END DOWNLOAD DATA FOR BHAVCOPY--------------------------------------------------
 			// ---------------------DOWNLOAD DATA FOR INDEX--------------------------------
-			String stockSymbol[] = null;
-			if(!tempSymbol.equalsIgnoreCase(""))
-				stockSymbol=tempSymbol.split(",");
-			
-			new IndexFiles().downloadIndexData(stockSymbol, toDate);
-			
+			List<IndexSymbol> tempSymbol = generateIndexString();
+			new IndexFiles().downloadIndexData(tempSymbol, toDate);
 			// ---------------------END DOWNLOAD DATA FOR INDEX--------------------
 			// DOWNLOAD EQUITY MARKET ACTIVITY REPORT
 			if (isChkBoxSelected(equityBase.getCheckboxes(),
@@ -262,21 +260,19 @@ public class DownloadFileThread implements Runnable {
 		logger.log("Ending download");
 	}
 
-	private String generateIndexString()  {
+	private List<IndexSymbol> generateIndexString()  {
+		List<IndexSymbol> indexSymbols = new ArrayList<>();
 		CheckBox[] indexes = Settings.getSettings().getDownload()
 				.getIndex().getCheckboxes();
-		String temp = "";
 		for (int i = 0; i < indexes.length; i++) {
 			if (Boolean.valueOf(indexes[i].getValue())) {
-				if (temp.equalsIgnoreCase("")) {
-					temp += CommonFunctions.getIndexCode(indexes[i].getName());
-				} else
-					temp += ","
-							+ CommonFunctions.getIndexCode(indexes[i]
-									.getName());
+				IndexSymbol symbol = new IndexSymbol();
+				symbol.setPrimaryCode(CommonFunctions.getIndexCode(indexes[i].getName()));
+				symbol.setAlternateCode(CommonFunctions.getOldIndexCode(indexes[i].getName()));
+				indexSymbols.add(symbol);
 			}
 		}
-		return temp;
+		return indexSymbols;
 	}
 
 	// DDM0NYYYY //DD-MM-YYYY
