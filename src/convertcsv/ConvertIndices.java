@@ -25,19 +25,27 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.PrintWriter;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import commonfunctions.CommonFunctions;
 import commonfunctions.FileUtil;
-
 import config.configxml.Settings;
+import dto.IndexSymbol;
 
 public class ConvertIndices extends ConvertFile{
 
-	private String indexSymbol;
+	private Set<String> oldStockSymbols;
+	private Set<String> newStockSymbols;
 	
-	public ConvertIndices(String indexSymbol){
-		this.indexSymbol=indexSymbol;
+	public ConvertIndices(List<IndexSymbol> stockSymbolList){
+		oldStockSymbols = new HashSet<>();
+		newStockSymbols = new HashSet<>();
+		for(IndexSymbol stockSymbol:stockSymbolList){
+			newStockSymbols.add(stockSymbol.getPrimaryCode());
+			oldStockSymbols.add(stockSymbol.getAlternateCode());
+		}
 	}
 	//fromDate=DD-MM-YYYY
 	//indexSymbol=S&P CNX NIFTY 
@@ -48,38 +56,26 @@ public class ConvertIndices extends ConvertFile{
 		String tempFilePath=System.getProperty("user.dir")+System.getProperty("file.separator")+"temp"+System.getProperty("file.separator")+"temp_"+fromDate+".txt";
 		PrintWriter writer=new PrintWriter(tempFilePath);
 		String line="";
-		String fileName="";
+		String fileName=CommonFunctions.getDateFormat(fromDate, CommonFunctions.DDMMYYYYhifenFormat,CommonFunctions.DDMMMYYYYFormat)+".txt";//DDMONYYYY.txt
 		String toBeWritten="";
 		int count=0;
 		while((line=reader.readLine())!=null){
 			count++;
 			if(count==1)
 				continue;
-			line=line.replace("\"", ""); //replacing " with nothing
-			line=line.replace(" ", ""); //replacing spaces with nothing
 			List <String> data=Arrays.asList(line.split(","));
-			fileName=CommonFunctions.getDateFormat(fromDate, CommonFunctions.DDMMYYYYhifenFormat,CommonFunctions.DDMMMYYYYFormat)+".txt";//DDMONYYYY.txt
-			data.set(0, CommonFunctions.getDateFormat(data.get(0), CommonFunctions.DDMMMYYYYhifenFormat, CommonFunctions.YYYYMMDDformat) );
-			if(indexSymbol.equals("S&P CNX DEFTY") || indexSymbol.equals("S&P ESG INDIA INDEX") || indexSymbol.equals("VIX"))
-			{
-			toBeWritten=CommonFunctions.convertIndexSymbol(indexSymbol)+","+ //index symbol
-			data.get(0)+","+//YYYYMMDD
-			data.get(1)+","+//Open
-			data.get(2)+","+//High
-			data.get(3)+","+//Low
-			data.get(4)+",0"+//Close,Volume
-			",0";}//OpenInterest
-			else
-			{
-				toBeWritten=CommonFunctions.convertIndexSymbol(indexSymbol)+","+//index symbol
-				data.get(0)+","+//YYYYMMDD
-				data.get(1)+","+//Open
-				data.get(2)+","+//High
-				data.get(3)+","+//Low
-				data.get(4)+","+//Close
-				data.get(5)+",0";//Volume,OI
+			String nseIndexSymbol = data.get(0).toUpperCase().trim();
+			if(newStockSymbols.contains(nseIndexSymbol) || oldStockSymbols.contains(nseIndexSymbol)){
+				data.set(1, CommonFunctions.getDateFormat(data.get(1).trim(), CommonFunctions.DDMMYYYYhifenFormat, CommonFunctions.YYYYMMDDformat) );
+				toBeWritten=CommonFunctions.convertIndexSymbol(data.get(0).trim())+","+//index symbol
+				data.get(1).trim()+","+//YYYYMMDD
+				(data.get(2).trim().equals("-")?"0":data.get(2).trim())+","+//Open
+				(data.get(3).trim().equals("-")?"0":data.get(3).trim())+","+//High
+				(data.get(4).trim().equals("-")?"0":data.get(4).trim())+","+//Low
+				(data.get(5).trim().equals("-")?"0":data.get(5).trim())+","+//Close
+				(data.get(8).trim().equals("-")?"0":data.get(8).trim())+",0";//Volume,OI
+				writer.println(toBeWritten);
 			}
-			writer.println(toBeWritten);
 		}
 		reader.close();
 		writer.close();

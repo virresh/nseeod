@@ -29,11 +29,6 @@ public class DownloadPanelBase extends CheckBoxHolder {
 	private String directory;
 
 	public String getDirectory() {
-		if(directory !=null && !directory.equals("")){
-		File file = new File(directory);
-		if(!file.exists())
-			file.mkdirs();
-		}
 		return directory;
 	}
 

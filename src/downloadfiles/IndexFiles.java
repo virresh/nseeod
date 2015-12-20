@@ -20,12 +20,14 @@ along with NSE EOD Data Downloader.  If not, see <http://www.gnu.org/licenses/>.
  */
 package downloadfiles;
 
-import java.io.FileNotFoundException;
+import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 
 import logging.Logging;
+
 import commonfunctions.CommonFunctions;
+
 import convertcsv.ConvertIndices;
 import dto.IndexSymbol;
 
@@ -39,35 +41,31 @@ public class IndexFiles extends DownloadFile {
 		logger.log("Starting Index download");
 		IndexSymbol[] stockSymbol = new IndexSymbol[stockSymbolList.size()];
 		stockSymbolList.toArray(stockSymbol);
-		int i = 0;
-		int attempt = 1;
-		while (stockSymbol!=null && i < stockSymbol.length)
-		{
+		String path="";
+		int attempt = 0;
+		while (attempt<3){
 			try {
-				try{
-					downloadCSV(stockSymbol[i].getPrimaryCode(),
-							date, date);
-				}catch(FileNotFoundException e){
-					logger.log(e, "Trying alternate code", true);
-					downloadCSV(stockSymbol[i].getAlternateCode(),
-							date, date);
-				}
+				path = downloadCSV("Indices",
+						date);
+				break;
 			}catch (Exception e) {
-				if (attempt == 3) {
-					i++;
-					logger.log(e, "Attemp Failed", true);
-					attempt = 1;
-					continue;
-				} else {
-					logger.log(e, "Retrying attempt :: " + attempt,
-							true);
-					attempt++;
-					continue;
-				}
+				logger.log(e, "Retrying attempt :: " + attempt,
+						true);
+				attempt++;
 			}
-			i++;
-			attempt = 1;
 		}
+		if (attempt == 3){
+			logger.log("Attemp Failed", true);
+			return;
+		}
+		//CONVERT THE CSV FILE INTO TEXT FILE
+		//------------------------------------------------------------
+		try {
+			new ConvertIndices(stockSymbolList).convertToDesiredFormat(path);
+		} catch (Exception e) {
+			logger.log(e,"Could not process the index file "+date+".csv",true);
+		}
+		//------------------------------------------------------------
 		logger.log("Ending Index download");
 	}
 	
@@ -80,28 +78,14 @@ public class IndexFiles extends DownloadFile {
 		downloadFile(link, outputDir, fileNameWithExtension, requestPropertyMap);
 	}
 
-	private void downloadCSV(String symbol,String fromDate,String toDate)  throws Exception{
+	private String downloadCSV(String symbol,String fromDate)  throws Exception{
 		logger.log(symbol, symbol);
 		String link=null;
-		if(symbol.equalsIgnoreCase("VIX")){
-			//link=("http://www.nseindia.com/content/vix/histdata/hist_india_vix_"+fromDate+"_"+fromDate+".csv");
-			link=String.format(getBaseURLs().getPrimaryLink().appendEndURL(getLinks().getVixBhacopyLink()) ,CommonFunctions.getStringToDate(fromDate, CommonFunctions.DDMMYYYYhifenFormat));
-		}
-		else{
-			//link=("http://www.nseindia.com/content/indices/histdata/"+symbol+fromDate+"-"+toDate+".csv").replace(" ", "%20");
-			link=String.format(getBaseURLs().getPrimaryLink().appendEndURL(getLinks().getIndexBahvcopyLink()),symbol.replace(" ", "%20"),CommonFunctions.getStringToDate(fromDate, CommonFunctions.DDMMYYYYhifenFormat));
-		}
+		link=String.format(getBaseURLs().getPrimaryLink().appendEndURL(getLinks().getIndexBahvcopyLink()),CommonFunctions.getStringToDate(fromDate, CommonFunctions.DDMMYYYYhifenFormat));
 		String outputDir=System.getProperty("user.dir")+"/temp/";		//SET THE DESTINATION OF OUTPUT FILE
 		String fileNameWithExtension=symbol+"_"+fromDate+".csv";
 		HashMap<String,String> requestPropertyMap= prepareRequestPropertyMap();
 		downloadFile(link, outputDir, fileNameWithExtension, requestPropertyMap);
-		//CONVERT THE CSV FILE INTO TEXT FILE
-		//------------------------------------------------------------
-		try {
-			new ConvertIndices(symbol).convertToDesiredFormat(outputDir+fileNameWithExtension);
-		} catch (Exception e) {
-			logger.log(e,"Could not process the file"+symbol+"_"+fromDate+".csv",true);
-		}
-		//------------------------------------------------------------
+		return outputDir +File.separator+ fileNameWithExtension;
 	}
 }

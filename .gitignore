@@ -5,3 +5,8 @@
 derby.log
 /nsedb/
 app.log*
+/Currency_Futures
+/Eod
+/Equity
+/Options
+/Futures

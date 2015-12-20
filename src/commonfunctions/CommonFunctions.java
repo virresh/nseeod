@@ -147,6 +147,8 @@ public class CommonFunctions {
 			return "NIFTY FIN SERVICE";
 		else if (indexName.equalsIgnoreCase("CNX METAL"))
 			return "NIFTY METAL";
+		else if (indexName.equalsIgnoreCase("VIX"))
+			return "INDIA VIX";
 		return indexName;
 	}
 	
@@ -199,52 +201,53 @@ public class CommonFunctions {
 			return "CNX FINANCE";
 		else if (indexName.equalsIgnoreCase("CNX METAL"))
 			return "CNX METAL";
+		else if (indexName.equalsIgnoreCase("VIX"))
+			return "INDIA VIX";
 		return indexName;
 	}
 	
-	
 	public static String convertIndexSymbol(String indexSymbol){
-		if (indexSymbol.equals("CNX NIFTY") || indexSymbol.equals("NIFTY 50"))
+		if (indexSymbol.equalsIgnoreCase("CNX NIFTY") || indexSymbol.equalsIgnoreCase("NIFTY 50"))
 			return "NIFTY";
-		else if (indexSymbol.equals("CNX NIFTY JUNIOR") || indexSymbol.equals("NIFTY NEXT 50"))
+		else if (indexSymbol.equalsIgnoreCase("CNX NIFTY JUNIOR") || indexSymbol.equalsIgnoreCase("NIFTY NEXT 50"))
 			return "JUNIOR";
-		else if (indexSymbol.equals( "BANK NIFTY") || indexSymbol.equals( "NIFTY BANK"))
+		else if (indexSymbol.equalsIgnoreCase( "BANK NIFTY") || indexSymbol.equalsIgnoreCase( "NIFTY BANK"))
 			return "BANKNIFTY";	 
-		else if (indexSymbol.equals("CNX 100") || indexSymbol.equals("NIFTY 100"))
+		else if (indexSymbol.equalsIgnoreCase("CNX 100") || indexSymbol.equalsIgnoreCase("NIFTY 100"))
 			return "NSE100";
-		else if (indexSymbol.equals("CNX MIDCAP") || indexSymbol.equals("NIFTY MIDCAP 100"))
+		else if (indexSymbol.equalsIgnoreCase("CNX MIDCAP") || indexSymbol.equalsIgnoreCase("NIFTY MIDCAP 100"))
 			return "NSEMIDCAP";
-		else if (indexSymbol.equals("CNX IT") || indexSymbol.equals("NIFTY IT"))
+		else if (indexSymbol.equalsIgnoreCase("CNX IT") || indexSymbol.equalsIgnoreCase("NIFTY IT"))
 			return "NSEIT";
-		else if (indexSymbol.equals("CNX 500") || indexSymbol.equals("NIFTY 500"))
+		else if (indexSymbol.equalsIgnoreCase("CNX 500") || indexSymbol.equalsIgnoreCase("NIFTY 500"))
 			return "NSE500";
-		else if (indexSymbol.equals("CNX DEFTY"))
+		else if (indexSymbol.equalsIgnoreCase("CNX DEFTY"))
 			return "NSEDEFTY";
-		else if (indexSymbol.equals("NIFTY MIDCAP 50"))
+		else if (indexSymbol.equalsIgnoreCase("NIFTY MIDCAP 50"))
 			return "MIDCAP50";
-		else if (indexSymbol.equals("S&P ESG INDIA INDEX"))
+		else if (indexSymbol.equalsIgnoreCase("S&P ESG INDIA INDEX"))
 			return "NSEESG";
-		else if (indexSymbol.equals("CNX NIFTY SHARIAH") || indexSymbol.equals("NIFTY50 SHARIAH"))
+		else if (indexSymbol.equalsIgnoreCase("CNX NIFTY SHARIAH") || indexSymbol.equalsIgnoreCase("NIFTY50 SHARIAH"))
 			return "NSESHARIAH";
-		else if (indexSymbol.equals("CNX 500 SHARIAH") || indexSymbol.equals("NIFTY500 SHARIAH"))
+		else if (indexSymbol.equalsIgnoreCase("CNX 500 SHARIAH") || indexSymbol.equalsIgnoreCase("NIFTY500 SHARIAH"))
 			return "SHARIAH500";
-		else if (indexSymbol.equals("CNX INFRA") || indexSymbol.equals("NIFTY INFRA"))
+		else if (indexSymbol.equalsIgnoreCase("CNX INFRA") || indexSymbol.equalsIgnoreCase("NIFTY INFRA"))
 			return "NSEINFRA";
-		else if (indexSymbol.equals("CNX REALTY") || indexSymbol.equals("NIFTY REALTY"))
+		else if (indexSymbol.equalsIgnoreCase("CNX REALTY") || indexSymbol.equalsIgnoreCase("NIFTY REALTY"))
 			return "NSEREALTY";
-		else if (indexSymbol.equals("CNX ENERGY") || indexSymbol.equals("NIFTY ENERGY"))
+		else if (indexSymbol.equalsIgnoreCase("CNX ENERGY") || indexSymbol.equalsIgnoreCase("NIFTY ENERGY"))
 			return "NSEENERGY";
-		else if (indexSymbol.equals("CNX FMCG") || indexSymbol.equals("NIFTY FMCG"))
+		else if (indexSymbol.equalsIgnoreCase("CNX FMCG") || indexSymbol.equalsIgnoreCase("NIFTY FMCG"))
 			return "NSEFMCG";
-		else if (indexSymbol.equals("CNX MNC") || indexSymbol.equals("NIFTY MNC"))
+		else if (indexSymbol.equalsIgnoreCase("CNX MNC") || indexSymbol.equalsIgnoreCase("NIFTY MNC"))
 			return "NSEMNC";
-		else if (indexSymbol.equals("CNX PHARMA") || indexSymbol.equals("NIFTY PHARMA"))
+		else if (indexSymbol.equalsIgnoreCase("CNX PHARMA") || indexSymbol.equalsIgnoreCase("NIFTY PHARMA"))
 			return "NSEPHARMA";
-		else if (indexSymbol.equals("CNX PSE") || indexSymbol.equals("NIFTY PSE"))
+		else if (indexSymbol.equalsIgnoreCase("CNX PSE") || indexSymbol.equalsIgnoreCase("NIFTY PSE"))
 			return "NSEPSE";
-		else if (indexSymbol.equals("CNX PSU BANK") || indexSymbol.equals("NIFTY PSU BANK"))
+		else if (indexSymbol.equalsIgnoreCase("CNX PSU BANK") || indexSymbol.equalsIgnoreCase("NIFTY PSU BANK"))
 			return "NSEPSUBANK";
-		else if (indexSymbol.equals("CNX SERVICE") || indexSymbol.equals("NIFTY SERV SECTOR"))
+		else if (indexSymbol.equalsIgnoreCase("CNX SERVICE") || indexSymbol.equalsIgnoreCase("NIFTY SERV SECTOR"))
 			return "NSESERVICE";
 		else if (indexSymbol.equalsIgnoreCase("CNX AUTO") || indexSymbol.equalsIgnoreCase("NIFTY AUTO"))
 			return "NSEAUTO";
@@ -252,6 +255,8 @@ public class CommonFunctions {
 			return "NSEFINANCE";
 		else if (indexSymbol.equalsIgnoreCase("CNX METAL") || indexSymbol.equalsIgnoreCase("NIFTY METAL"))
 			return "NSEMETAL";
+		else if (indexSymbol.equalsIgnoreCase("INDIA VIX"))
+			return "VIX";
 		return indexSymbol;
 	}
 }

@@ -20,6 +20,8 @@ along with NSE EOD Data Downloader.  If not, see <http://www.gnu.org/licenses/>.
  */
 package config;
 
+import java.io.File;
+
 import config.configxml.Settings;
 import config.configxml.download.Download;
 import config.configxml.download.DownloadPanelBase;
@@ -37,23 +39,28 @@ public class ConfigRW {
 		settings.getDownload().setOptions(new DownloadPanelBase());
 		settings.setOthers(new Others());
 		new DBExecutor().readAllSettings(settings);
-		if(settings.getDownload().getEquity().getDirectory()==null || settings.getDownload().getEquity().getDirectory().equalsIgnoreCase(""))
+		if(settings.getDownload().getEquity().getDirectory()==null || settings.getDownload().getEquity().getDirectory().equalsIgnoreCase("") ||
+				!(new File(settings.getDownload().getEquity().getDirectory()).exists()) )
 		{
 			settings.getDownload().getEquity().setDirectory(System.getProperty("user.dir")+System.getProperty("file.separator")+"Equity");
 		}
-		if(settings.getDownload().getFutures().getDirectory()==null || settings.getDownload().getFutures().getDirectory().equalsIgnoreCase(""))
+		if(settings.getDownload().getFutures().getDirectory()==null || settings.getDownload().getFutures().getDirectory().equalsIgnoreCase("") || 
+				!(new File(settings.getDownload().getFutures().getDirectory()).exists()))
 		{
 			settings.getDownload().getFutures().setDirectory(System.getProperty("user.dir")+System.getProperty("file.separator")+"Futures");	
 		}
-		if(settings.getDownload().getOptions().getDirectory()==null || settings.getDownload().getOptions().getDirectory().equalsIgnoreCase(""))
+		if(settings.getDownload().getOptions().getDirectory()==null || settings.getDownload().getOptions().getDirectory().equalsIgnoreCase("") ||
+				!(new File(settings.getDownload().getOptions().getDirectory()).exists()))
 		{
 			settings.getDownload().getOptions().setDirectory(System.getProperty("user.dir")+System.getProperty("file.separator")+"Options");	
 		}
-		if(settings.getDownload().getCurrencyfutures().getDirectory()==null || settings.getDownload().getCurrencyfutures().getDirectory().equalsIgnoreCase(""))
+		if(settings.getDownload().getCurrencyfutures().getDirectory()==null || settings.getDownload().getCurrencyfutures().getDirectory().equalsIgnoreCase("") ||
+				!(new File(settings.getDownload().getCurrencyfutures().getDirectory()).exists()))
 		{
 			settings.getDownload().getCurrencyfutures().setDirectory(System.getProperty("user.dir")+System.getProperty("file.separator")+"Currency_Futures");	
 		}
-		if(settings.getOthers().getDirectory()==null || settings.getOthers().getDirectory().equalsIgnoreCase(""))
+		if(settings.getOthers().getDirectory()==null || settings.getOthers().getDirectory().equalsIgnoreCase("") || 
+				!(new File(settings.getOthers().getDirectory()).exists()))
 		{
 			settings.getOthers().setDirectory(System.getProperty("user.dir")+System.getProperty("file.separator")+"Eod");	
 		}			

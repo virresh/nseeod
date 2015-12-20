@@ -23,6 +23,6 @@ package commonfunctions;
 
 public class Constants {
 	
-	public static final String versionNumber="3.1";
+	public static final String versionNumber="3.2";
 
 }
