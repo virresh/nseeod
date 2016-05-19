@@ -191,7 +191,7 @@ public class Details extends JFrame {
 		if (jTextArea == null) {
 			jTextArea = new JTextArea();
 			jTextArea.setBounds(new Rectangle(149, 197, 256, 18));
-			jTextArea.setText("Copyright (C) 2015  Rohit Jhunjhunwala");
+			jTextArea.setText("Copyright (C) 2016  Rohit Jhunjhunwala");
 			jTextArea.setFont(new Font("Tahoma", Font.PLAIN, 11));
 		}
 		return jTextArea;
