@@ -1,5 +1,6 @@
 /*
-Copyright (c) 2011,2012,2013,2014 Rohit Jhunjhunwala
+Author: Rohit Jhunjhunwala (2011-2016)
+Modified by: Viresh Gupta (@virresh)
 
 The program is distributed under the terms of the GNU General Public License
 
@@ -160,6 +161,7 @@ public class DownloadFile {
 		else if(type.equals("cmprzip")){
 			generateURL=String.format(baseURLs.getPrimaryLink().appendEndURL(links.getOtherReportsLink()),CommonFunctions.getStringToDate(date, CommonFunctions.DDMMYYYYhifenFormat));
 		}
+		System.out.println(generateURL);
 		downloadFile(generateURL, outputDir, fileNameWithExtension, requestPropertyMap);
 		outputFile = new File(outputDir+fileNameWithExtension);
 		logger.log("Completed zip download");

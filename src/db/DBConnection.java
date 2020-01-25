@@ -1,5 +1,6 @@
 /*
-Copyright (c) 2011,2012,2013,2014 Rohit Jhunjhunwala
+Author: Rohit Jhunjhunwala (2011-2016)
+Modified by: Viresh Gupta (@virresh)
 
 The program is distributed under the terms of the GNU General Public License
 
@@ -34,6 +35,7 @@ class DBConnection {
 	private static void initDataSource(){
 		EmbeddedConnectionPoolDataSource40 ecps=new EmbeddedConnectionPoolDataSource40();
 		ecps.setDatabaseName(System.getProperty("user.dir")+"/nsedb");
+		ecps.setCreateDatabase("create");
 		ecps.setUser("nseeod");
 		ecps.setPassword("nseeod");
 		ds=ecps;
@@ -43,7 +45,10 @@ class DBConnection {
 	//connections are not fetched frequently. Hence avoiding double checked locking or similar optimization
 	public static synchronized Connection getConnection() throws SQLException{
 		if(ds==null)
+		{
 			initDataSource();
+//			System.out.print(ds.getConnection().isClosed() + "\n");
+		}
 		return ds.getConnection();
 	}
 }
