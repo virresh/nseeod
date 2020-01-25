@@ -1,3 +1,9 @@
+##### Fixes have been made to the Derby database  
+Find the updated version here: https://github.com/virresh/nseeod/releases/tag/v3.3.1
+
+
+Original Description:  
+
 # nseeod
 NSE EOD Data Downloader was built out of my frustration of not getting valid free stock price data at the tip of my hands, and sharing this project has only made lives easier for people like me who are interested in analyzing stock price data.
 

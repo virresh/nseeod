@@ -1,5 +1,6 @@
 /*
-Copyright (c) 2011,2012,2013,2014 Rohit Jhunjhunwala
+Author: Rohit Jhunjhunwala (2011-2016)
+Modified by: Viresh Gupta (@virresh)
 
 The program is distributed under the terms of the GNU General Public License
 
@@ -29,7 +30,7 @@ import java.util.ArrayList;
 import java.util.GregorianCalendar;
 import java.util.List;
 
-import com.sun.org.apache.xalan.internal.xsltc.compiler.sym;
+//import com.sun.org.apache.xalan.internal.xsltc.compiler.sym;
 
 import logging.Logging;
 import commonfunctions.CommonFunctions;

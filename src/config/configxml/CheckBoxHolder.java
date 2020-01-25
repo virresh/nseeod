@@ -1,5 +1,6 @@
 /*
-Copyright (c) 2011,2012,2013,2014 Rohit Jhunjhunwala
+Author: Rohit Jhunjhunwala (2011-2016)
+Modified by: Viresh Gupta (@virresh)
 
 The program is distributed under the terms of the GNU General Public License
 
