@@ -1,6 +1,6 @@
 # THIS SOFTWARE IS NO LONGER MAINTAINED. NO FURTHER FIXES WILL BE RELEASED
 
-Please consider switching to StockD https://github.com/virresh/StockD. It has more features and better UI than NSE Eod Data Downloader and many more improvements will be upcoming.
+## Please consider switching to StockD https://github.com/virresh/StockD. It has more features and better UI than NSE Eod Data Downloader and many more improvements will be upcoming.
 
 
 
